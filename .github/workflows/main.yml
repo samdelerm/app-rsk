@@ -1,4 +1,4 @@
-name: Run Serveur API
+name: Test Flask Server
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  run-server:
+  test-server:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,5 +26,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirement.txt
 
-      - name: Run Serveur API
-        run: python Serveur_API.py
+      - name: Start Flask Server
+        run: |
+          nohup python Serveur_API.py &  # Lance en arrière-plan
+          sleep 5  # Attends que le serveur démarre
+
+      - name: Test Flask Server
+        run: curl --fail http://127.0.0.1:5000 || exit 1  # Vérifie si le serveur répond
+
+      - name: Stop Flask Server
+        run: pkill -f Serveur_API.py  # Termine le processus Flask
