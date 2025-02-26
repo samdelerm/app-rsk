@@ -18,7 +18,7 @@ def send_score():
             green_score = client.referee["teams"]["green"]["score"]
             green_name = client.referee["teams"]["green"]["name"]
             timer = client.referee["timer"]
-            response = requests.post("http://127.0.0.1:5000/update_score", json={
+            response = requests.post("https://app-rsk.onrender.com/update_score", json={
                 "blue_score": blue_score, 
                 "blue_name": blue_name,
                 "green_score": green_score,
