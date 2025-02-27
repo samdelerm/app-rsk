@@ -48,10 +48,7 @@ index_html = """
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline;
         }
         label {
             display: block;
@@ -75,6 +72,18 @@ index_html = """
         button:hover {
             background-color: #218838;
         }
+        .match-status {
+            font-weight: bold;
+        }
+        .match-status.completed {
+            color: #6c757d;
+        }
+        .match-status.ongoing {
+            color: #007bff;
+        }
+        .match-status.upcoming {
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
@@ -82,15 +91,15 @@ index_html = """
     <h2>Matches</h2>
     <ul>
         {% for match in matches %}
-            <li style="font-weight: {% if match.status == 'ongoing' %}bold{% endif %};">
+            <li class="match-status {{ match.status }}">
                 {{ match.blue_team }} vs {{ match.green_team }} - {{ match.blue_score }}:{{ match.green_score }} ({{ match.status }})
                 {% if match.status == 'upcoming' %}
-                    <form action="/start_match" method="post" style="display:inline;">
+                    <form action="/start_match" method="post">
                         <input type="hidden" name="match_id" value="{{ match.id }}">
                         <button type="submit">Start Match</button>
                     </form>
                 {% elif match.status == 'ongoing' %}
-                    <form action="/end_match" method="post" style="display:inline;">
+                    <form action="/end_match" method="post">
                         <input type="hidden" name="match_id" value="{{ match.id }}">
                         <button type="submit">End Match</button>
                     </form>

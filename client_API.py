@@ -9,6 +9,11 @@ logging.basicConfig(level=logging.INFO)
 
 # API Client : Récupère le score et l'envoie au serveur
 
+def format_timer(seconds):
+    minutes = seconds // 60
+    seconds = seconds % 60
+    return f"{minutes}min {seconds}sec"
+
 def send_score():
     client = rsk.Client()
     while True:
@@ -17,7 +22,7 @@ def send_score():
             blue_name = client.referee["teams"]["blue"]["name"]
             green_score = client.referee["teams"]["green"]["score"]
             green_name = client.referee["teams"]["green"]["name"]
-            timer = client.referee["timer"]
+            timer = format_timer(client.referee["timer"])
             response = requests.post("https://app-rsk.onrender.com/update_score", json={
                 "blue_score": blue_score, 
                 "blue_name": blue_name,
