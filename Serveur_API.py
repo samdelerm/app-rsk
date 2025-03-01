@@ -8,11 +8,8 @@ team_info = {
     "timer": 0
 }
 
-matches = [
-    {"id": 1, "blue_team": "Team A", "green_team": "Team B", "blue_score": 2, "green_score": 1, "status": "completed"},
-    {"id": 2, "blue_team": "Team C", "green_team": "Team D", "blue_score": 0, "green_score": 0, "status": "ongoing"},
-    {"id": 3, "blue_team": "Team E", "green_team": "Team F", "blue_score": 0, "green_score": 0, "status": "upcoming"}
-]
+matches = []
+teams = []
 
 # HTML template for index.html
 index_html = """
@@ -85,7 +82,11 @@ index_html = """
             background-color: #f2f2f2;
         }
     </style>
-    
+    <script>
+        setInterval(function() {
+            window.location.reload();
+        }, 5000);  // Refresh every 5 seconds
+    </script>
 </head>
 <body>
     <h1>Match Info</h1>
@@ -108,6 +109,12 @@ index_html = """
             </li>
         {% endfor %}
     </ul>
+    <h2>Add Team</h2>
+    <form action="/add_team" method="post">
+        <label for="team_name">Team Name:</label>
+        <input type="text" id="team_name" name="team_name">
+        <button type="submit">Add Team</button>
+    </form>
     <h2>Update Team Name</h2>
     <form action="/set_team_name" method="post">
         <label for="blue_name">Blue Team Name:</label>
@@ -115,18 +122,6 @@ index_html = """
         <label for="green_name">Green Team Name:</label>
         <input type="text" id="green_name" name="green_name">
         <button type="submit">Update</button>
-    </form>
-    <h2>Add/Update Match</h2>
-    <form action="/add_update_match" method="post">
-        <label for="match_id">Match ID (leave blank to add new match):</label>
-        <input type="text" id="match_id" name="match_id">
-        <label for="blue_team">Blue Team:</label>
-        <input type="text" id="blue_team" name="blue_team">
-        <label for="green_team">Green Team:</label>
-        <input type="text" id="green_team" name="green_team">
-        <label for="match_time">Match Time:</label>
-        <input type="datetime-local" id="match_time" name="match_time">
-        <button type="submit">Add/Update Match</button>
     </form>
     <h2>Team Standings</h2>
     <table>
@@ -179,7 +174,7 @@ def distribute_teams_and_create_matches(teams):
     random.shuffle(teams)
     num_pools = 4  # Example: 4 pools
     pools = [teams[i::num_pools] for i in range(num_pools)]
-    match_id = max(match["id"] for match in matches) + 1
+    match_id = 1
     for pool in pools:
         for i in range(len(pool)):
             for j in range(i + 1, len(pool)):
@@ -196,11 +191,23 @@ def distribute_teams_and_create_matches(teams):
 @server.route("/distribute_teams", methods=["POST"])
 def distribute_teams():
     try:
-        teams = request.form.getlist("teams")
         distribute_teams_and_create_matches(teams)
-        return  200
+        return jsonify({"message": "Teams distributed successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error distributing teams"}), 500
+
+@server.route("/add_team", methods=["POST"])
+def add_team():
+    try:
+        team_name = request.form.get("team_name")
+        if team_name:
+            teams.append(team_name)
+            distribute_teams_and_create_matches(teams)
+            return jsonify({"message": "Team added and matches created successfully"}), 200
+        else:
+            return jsonify({"message": "Invalid team name"}), 400
+    except Exception as e:
+        return jsonify({"message": "Error adding team"}), 500
 
 @server.route("/update_score", methods=["POST"])
 def update_score():
@@ -219,7 +226,6 @@ def update_score():
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        
         return jsonify({"message": "Error updating scores, names, and timer"}), 500
 
 @server.route("/set_team_name", methods=["POST"])
@@ -229,7 +235,7 @@ def set_team_name():
         data = request.form
         team_info["blue"]["name"] = data.get("blue_name", team_info["blue"]["name"])
         team_info["green"]["name"] = data.get("green_name", team_info["green"]["name"])
-        return  200
+        return jsonify({"message": "Team names updated successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error updating team names"}), 500
 
@@ -257,7 +263,7 @@ def get_matches():
     try:
         return jsonify(matches), 200
     except Exception as e:
-        return  500
+        return jsonify({"message": "Error fetching matches"}), 500
 
 @server.route("/add_update_match", methods=["POST"])
 def add_update_match():
@@ -281,10 +287,10 @@ def add_update_match():
             else:
                 matches.append({"id": match_id, "blue_team": blue_team, "green_team": green_team, "blue_score": 0, "green_score": 0, "status": "upcoming", "match_time": match_time})
         else:
-            new_id = max(match["id"] for match in matches) + 1
+            new_id = max(match["id"] for match in matches) + 1 if matches else 1
             matches.append({"id": new_id, "blue_team": blue_team, "green_team": green_team, "blue_score": 0, "green_score": 0, "status": "upcoming", "match_time": match_time})
         
-        return  200
+        return jsonify({"message": "Match added/updated successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error adding/updating match"}), 500
 
@@ -297,7 +303,7 @@ def start_match():
             if match["id"] == match_id:
                 match["status"] = "ongoing"
                 break
-        return 200
+        return jsonify({"message": "Match started successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error starting match"}), 500
 
@@ -313,9 +319,9 @@ def end_match():
                 match["green_score"] = team_info["green"]["score"]
                 match["timer"] = team_info["timer"]
                 break
-        return  200
+        return jsonify({"message": "Match ended successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0",debug=True, port=5000)
+    server.run(host="0.0.0.0", debug=True, port=5000)
