@@ -1,8 +1,4 @@
 from flask import Flask, request, jsonify, render_template_string
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 # API Serveur : Stocke les infos et gère les requêtes
 server = Flask(__name__)
@@ -75,6 +71,19 @@ index_html = """
         button:hover {
             background-color: #218838;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
     <script>
         setInterval(function() {
@@ -123,13 +132,79 @@ index_html = """
         <input type="datetime-local" id="match_time" name="match_time">
         <button type="submit">Add/Update Match</button>
     </form>
+    <h2>Team Standings</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Wins</th>
+                <th>Losses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team, record in standings.items() %}
+                <tr>
+                    <td>{{ team }}</td>
+                    <td>{{ record.wins }}</td>
+                    <td>{{ record.losses }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
 """
 
+def calculate_standings():
+    standings = {}
+    for match in matches:
+        if match["status"] == "completed":
+            blue_team = match["blue_team"]
+            green_team = match["green_team"]
+            if blue_team not in standings:
+                standings[blue_team] = {"wins": 0, "losses": 0}
+            if green_team not in standings:
+                standings[green_team] = {"wins": 0, "losses": 0}
+            if match["blue_score"] > match["green_score"]:
+                standings[blue_team]["wins"] += 1
+                standings[green_team]["losses"] += 1
+            else:
+                standings[blue_team]["losses"] += 1
+                standings[green_team]["wins"] += 1
+    return standings
+
 @server.route("/")
 def index():
-    return render_template_string(index_html, team_info=team_info, matches=matches)
+    standings = calculate_standings()
+    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings)
+
+def distribute_teams_and_create_matches(teams):
+    import random
+    random.shuffle(teams)
+    num_pools = 4  # Example: 4 pools
+    pools = [teams[i::num_pools] for i in range(num_pools)]
+    match_id = max(match["id"] for match in matches) + 1
+    for pool in pools:
+        for i in range(len(pool)):
+            for j in range(i + 1, len(pool)):
+                matches.append({
+                    "id": match_id,
+                    "blue_team": pool[i],
+                    "green_team": pool[j],
+                    "blue_score": 0,
+                    "green_score": 0,
+                    "status": "upcoming"
+                })
+                match_id += 1
+
+@server.route("/distribute_teams", methods=["POST"])
+def distribute_teams():
+    try:
+        teams = request.form.getlist("teams")
+        distribute_teams_and_create_matches(teams)
+        return  200
+    except Exception as e:
+        return jsonify({"message": "Error distributing teams"}), 500
 
 @server.route("/update_score", methods=["POST"])
 def update_score():
@@ -144,7 +219,7 @@ def update_score():
             match["green_score"] = data.get("green_score", match["green_score"])
             match["green_team"] = data.get("green_name", match["green_team"])
             match["timer"] = data.get("timer", match.get("timer", 0))
-            return jsonify({"message": "Scores, names, and timer updated"}), 200
+            return  200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
@@ -157,10 +232,8 @@ def set_team_name():
         data = request.form
         team_info["blue"]["name"] = data.get("blue_name", team_info["blue"]["name"])
         team_info["green"]["name"] = data.get("green_name", team_info["green"]["name"])
-        #logging.info(f"Team names updated: Blue - {team_info['blue']['name']}, Green - {team_info['green']['name']}")
-        return jsonify({"message": "Team names updated"}), 200
+        return  200
     except Exception as e:
-        logging.error(f"Error updating team names: {e}")
         return jsonify({"message": "Error updating team names"}), 500
 
 @server.route("/get_team_info", methods=["GET"])
@@ -170,24 +243,18 @@ def get_team_info():
         match_id = int(match_id)
         match = next((m for m in matches if m["id"] == match_id), None)
         if match:
-            return jsonify({
-                "blue": {"name": match["blue_team"], "score": match["blue_score"]},
-                "green": {"name": match["green_team"], "score": match["green_score"]},
-                "timer": match.get("timer", 0)
-            }), 200
+            return 200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        logging.error(f"Error fetching team info: {e}")
-        return jsonify({"message": "Error fetching team info"}), 500
+        return  500
 
 @server.route("/get_matches", methods=["GET"])
 def get_matches():
     try:
         return jsonify(matches), 200
     except Exception as e:
-        logging.error(f"Error fetching matches: {e}")
-        return jsonify({"message": "Error fetching matches"}), 500
+        return  500
 
 @server.route("/add_update_match", methods=["POST"])
 def add_update_match():
@@ -214,10 +281,8 @@ def add_update_match():
             new_id = max(match["id"] for match in matches) + 1
             matches.append({"id": new_id, "blue_team": blue_team, "green_team": green_team, "blue_score": 0, "green_score": 0, "status": "upcoming", "match_time": match_time})
         
-       # logging.info(f"Match added/updated: {blue_team} vs {green_team} at {match_time}")
-        return jsonify({"message": "Match added/updated"}), 200
+        return  200
     except Exception as e:
-        logging.error(f"Error adding/updating match: {e}")
         return jsonify({"message": "Error adding/updating match"}), 500
 
 @server.route("/start_match", methods=["POST"])
@@ -228,11 +293,9 @@ def start_match():
         for match in matches:
             if match["id"] == match_id:
                 match["status"] = "ongoing"
-                #logging.info(f"Match started: {match['blue_team']} vs {match['green_team']}")
                 break
-        return jsonify({"message": "Match started"}), 200
+        return 200
     except Exception as e:
-        logging.error(f"Error starting match: {e}")
         return jsonify({"message": "Error starting match"}), 500
 
 @server.route("/end_match", methods=["POST"])
@@ -247,9 +310,8 @@ def end_match():
                 match["green_score"] = team_info["green"]["score"]
                 match["timer"] = team_info["timer"]
                 break
-        return jsonify({"message": "Match ended"}), 200
+        return  200
     except Exception as e:
-        logging.error(f"Error ending match: {e}")
         return jsonify({"message": "Error ending match"}), 500
 
 if __name__ == "__main__":

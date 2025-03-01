@@ -9,6 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.spinner import Spinner
+import threading
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,9 +30,13 @@ class MatchSelectorApp(App):
         self.spinner = Spinner(text='Select Match', values=[])
         self.layout.add_widget(self.spinner)
         
-        self.button = Button(text="Start Sending Scores")
-        self.button.bind(on_press=self.start_sending_scores)
-        self.layout.add_widget(self.button)
+        self.start_button = Button(text="Start Sending Scores")
+        self.start_button.bind(on_press=self.start_sending_scores)
+        self.layout.add_widget(self.start_button)
+        
+        self.stop_button = Button(text="Stop Sending Scores")
+        self.stop_button.bind(on_press=self.stop_sending_scores)
+        self.layout.add_widget(self.stop_button)
         
         self.update_matches()
         
@@ -51,11 +56,18 @@ class MatchSelectorApp(App):
         selected_match = self.spinner.text
         if selected_match != 'Select Match':
             match_id = int(selected_match.split(":")[0])
-            send_score(match_id)
+            self.send_score_thread = threading.Thread(target=send_score, args=(match_id,))
+            self.send_score_thread.start()
+    
+    def stop_sending_scores(self, instance):
+        global stop_sending
+        stop_sending = True
 
 def send_score(match_id):
+    global stop_sending
+    stop_sending = False
     client = rsk.Client()
-    while True:
+    while not stop_sending:
         try:
             blue_score = client.referee["teams"]["blue"]["score"]
             blue_name = client.referee["teams"]["blue"]["name"]
