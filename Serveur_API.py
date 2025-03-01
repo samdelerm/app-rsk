@@ -240,14 +240,20 @@ def set_team_name():
 def get_team_info():
     match_id = request.args.get("match_id")
     try:
+        if match_id == "Select Match":
+            return jsonify({"message": "Invalid match ID"}), 400
         match_id = int(match_id)
         match = next((m for m in matches if m["id"] == match_id), None)
         if match:
-            return 200
+            return jsonify({
+                "blue": {"name": match["blue_team"], "score": match["blue_score"]},
+                "green": {"name": match["green_team"], "score": match["green_score"]},
+                "timer": match.get("timer", 0)
+            }), 200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        return  500
+        return jsonify({"message": "Error fetching team info"}), 500
 
 @server.route("/get_matches", methods=["GET"])
 def get_matches():
