@@ -133,7 +133,7 @@ def index():
 
 @server.route("/update_score", methods=["POST"])
 def update_score():
-    global team_info, matches
+    global matches
     try:
         data = request.get_json()
         match_id = data.get("match_id")
@@ -143,7 +143,7 @@ def update_score():
             match["blue_team"] = data.get("blue_name", match["blue_team"])
             match["green_score"] = data.get("green_score", match["green_score"])
             match["green_team"] = data.get("green_name", match["green_team"])
-            team_info["timer"] = data.get("timer", team_info["timer"])
+            match["timer"] = data.get("timer", match.get("timer", 0))
             return jsonify({"message": "Scores, names, and timer updated"}), 200
         else:
             return jsonify({"message": "Match not found"}), 404
@@ -173,7 +173,7 @@ def get_team_info():
             return jsonify({
                 "blue": {"name": match["blue_team"], "score": match["blue_score"]},
                 "green": {"name": match["green_team"], "score": match["green_score"]},
-                "timer": team_info["timer"]
+                "timer": match.get("timer", 0)
             }), 200
         else:
             return jsonify({"message": "Match not found"}), 404
@@ -245,7 +245,7 @@ def end_match():
                 match["status"] = "completed"
                 match["blue_score"] = team_info["blue"]["score"]
                 match["green_score"] = team_info["green"]["score"]
-               #logging.info(f"Match ended: {match['blue_team']} vs {match['green_team']} with score {match['blue_score']}:{match['green_score']}")
+                match["timer"] = team_info["timer"]
                 break
         return jsonify({"message": "Match ended"}), 200
     except Exception as e:
