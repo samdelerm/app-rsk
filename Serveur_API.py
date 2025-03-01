@@ -253,4 +253,4 @@ def end_match():
         return jsonify({"message": "Error ending match"}), 500
 
 if __name__ == "__main__":
-    server.run(debug=True, port=5000)
+    server.run(host="0.0.0.0",debug=True, port=5000)
