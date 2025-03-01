@@ -82,11 +82,6 @@ index_html = """
             background-color: #f2f2f2;
         }
     </style>
-    <script>
-        setInterval(function() {
-            window.location.reload();
-        }, 5000);  // Refresh every 5 seconds
-    </script>
 </head>
 <body>
     <h1>Match Info</h1>
@@ -142,6 +137,12 @@ index_html = """
             {% endfor %}
         </tbody>
     </table>
+    <h2>Teams</h2>
+    <ul>
+        {% for team in teams %}
+            <li>{{ team }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
 """
@@ -167,7 +168,7 @@ def calculate_standings():
 @server.route("/")
 def index():
     standings = calculate_standings()
-    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings)
+    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings, teams=teams)
 
 def distribute_teams_and_create_matches(teams):
     import random
@@ -202,6 +203,7 @@ def add_team():
         team_name = request.form.get("team_name")
         if team_name:
             teams.append(team_name)
+            matches.clear()  # Clear existing matches before creating new ones
             distribute_teams_and_create_matches(teams)
             return jsonify({"message": "Team added and matches created successfully"}), 200
         else:
