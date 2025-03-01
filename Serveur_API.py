@@ -203,7 +203,7 @@ def add_team():
         team_name = request.form.get("team_name")
         if team_name:
             teams.append(team_name)
-            matches.clear()  # Clear existing matches before creating new ones
+
             distribute_teams_and_create_matches(teams)
             return jsonify({"message": "Team added and matches created successfully"}), 200
         else:
