@@ -85,11 +85,7 @@ index_html = """
             background-color: #f2f2f2;
         }
     </style>
-    <script>
-        setInterval(function() {
-            window.location.reload();
-        }, 5000);  // Refresh every 5 seconds
-    </script>
+    
 </head>
 <body>
     <h1>Match Info</h1>
