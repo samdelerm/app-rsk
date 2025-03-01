@@ -219,10 +219,11 @@ def update_score():
             match["green_score"] = data.get("green_score", match["green_score"])
             match["green_team"] = data.get("green_name", match["green_team"])
             match["timer"] = data.get("timer", match.get("timer", 0))
-            return  200
+            return jsonify({"message": "Scores, names, and timer updated"}), 200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
+        
         return jsonify({"message": "Error updating scores, names, and timer"}), 500
 
 @server.route("/set_team_name", methods=["POST"])
