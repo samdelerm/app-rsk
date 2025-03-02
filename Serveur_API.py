@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, jsonify, render_template_string
 
 # API Serveur : Stocke les infos et gère les requêtes
@@ -10,6 +11,35 @@ team_info = {
 
 matches = []
 teams = []
+pools = [[], [], [], []]
+
+def load_data():
+    global matches, teams, pools
+    try:
+        with open('matches.json', 'r') as f:
+            matches = json.load(f)
+    except FileNotFoundError:
+        matches = []
+    try:
+        with open('teams.json', 'r') as f:
+            teams = json.load(f)
+    except FileNotFoundError:
+        teams = []
+    try:
+        with open('pools.json', 'r') as f:
+            pools = json.load(f)
+    except FileNotFoundError:
+        pools = [[], [], [], []]
+
+def save_data():
+    with open('matches.json', 'w') as f:
+        json.dump(matches, f)
+    with open('teams.json', 'w') as f:
+        json.dump(teams, f)
+    with open('pools.json', 'w') as f:
+        json.dump(pools, f)
+
+load_data()
 
 # HTML template for index.html
 index_html = """
@@ -45,6 +75,7 @@ index_html = """
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         label {
             display: block;
@@ -81,37 +112,122 @@ index_html = """
         th {
             background-color: #f2f2f2;
         }
+        .delete-button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
     </style>
+    <script>
+        function submitForm(event, formId) {
+            event.preventDefault();
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: form.method,
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.message) {
+                      alert(data.message);
+                  }
+                  window.location.reload();
+              }).catch(error => console.error('Error:', error));
+        }
+
+        function deleteTeam(teamName) {
+            fetch('/delete_team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ team_name: teamName })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.message) {
+                      alert(data.message);
+                  }
+                  window.location.reload();
+              }).catch(error => console.error('Error:', error));
+        }
+    </script>
 </head>
 <body>
     <h1>Match Info</h1>
     <h2>Matches</h2>
-    <ul>
-        {% for match in matches %}
-            <li style="font-weight: {% if match.status == 'ongoing' %}bold{% endif %};">
-                {{ match.blue_team }} vs {{ match.green_team }} - {{ match.blue_score }}:{{ match.green_score }} ({{ match.status }})
-                {% if match.status == 'upcoming' %}
-                    <form action="/start_match" method="post" style="display:inline;">
-                        <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <button type="submit">Start Match</button>
-                    </form>
-                {% elif match.status == 'ongoing' %}
-                    <form action="/end_match" method="post" style="display:inline;">
-                        <input type="hidden" name="match_id" value="{{ match.id }}">
-                        <button type="submit">End Match</button>
-                    </form>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Poule 1</th>
+                <th>Poule 2</th>
+                <th>Poule 3</th>
+                <th>Poule 4</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(max(len(pools[0]), len(pools[1]), len(pools[2]), len(pools[3]))) %}
+            <tr>
+                {% for j in range(4) %}
+                <td>
+                    {% if i < len(pools[j]) %}
+                    {{ pools[j][i] }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Generated Matches</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Match ID</th>
+                <th>Poule</th>
+                <th>Blue Team</th>
+                <th>Green Team</th>
+                <th>Blue Score</th>
+                <th>Green Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+            <tr>
+                <td>{{ match.id }}</td>
+                <td>{{ match.poule }}</td>
+                <td>{{ match.blue_team }}</td>
+                <td>{{ match.green_team }}</td>
+                <td>{{ match.blue_score }}</td>
+                <td>{{ match.green_score }}</td>
+                <td>{{ match.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <h2>Add Team</h2>
-    <form action="/add_team" method="post">
+    <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')">
         <label for="team_name">Team Name:</label>
         <input type="text" id="team_name" name="team_name">
         <button type="submit">Add Team</button>
     </form>
+    <h2>Generate Pools</h2>
+    <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')">
+        <button type="submit">Generate</button>
+    </form>
+    {% if pools[0] or pools[1] or pools[2] or pools[3] %}
+    <h2>Generate Matches</h2>
+    <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')">
+        <button type="submit">Generate Matches</button>
+    </form>
+    {% endif %}
     <h2>Update Team Name</h2>
-    <form action="/set_team_name" method="post">
+    <form id="set_team_name" action="/set_team_name" method="post" onsubmit="submitForm(event, 'set_team_name')">
         <label for="blue_name">Blue Team Name:</label>
         <input type="text" id="blue_name" name="blue_name">
         <label for="green_name">Green Team Name:</label>
@@ -140,7 +256,7 @@ index_html = """
     <h2>Teams</h2>
     <ul>
         {% for team in teams %}
-            <li>{{ team }}</li>
+            <li>{{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button></li>
         {% endfor %}
     </ul>
 </body>
@@ -168,19 +284,36 @@ def calculate_standings():
 @server.route("/")
 def index():
     standings = calculate_standings()
-    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings, teams=teams)
+    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
 
-def distribute_teams_and_create_matches(teams):
+def distribute_teams_into_pools(teams):
     import random
     random.shuffle(teams)
-    num_pools = 4  # Example: 4 pools
-    pools = [teams[i::num_pools] for i in range(num_pools)]
+    num_pools = min(4, max(1, len(teams) // 3))  # Create up to 4 pools of 3 teams each, at least 1 pool
+    for i in range(num_pools):
+        pools[i] = teams[i::num_pools]
+
+@server.route("/generate_pools", methods=["POST"])
+def generate_pools():
+    try:
+        if len(teams) < 2:
+            return jsonify({"message": "At least 2 teams are required to generate pools"}), 400
+        for pool in pools:
+            pool.clear()  # Clear existing pools before creating new ones
+        distribute_teams_into_pools(teams)
+        save_data()
+        return jsonify({"message": "Pools generated successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": "Error generating pools"}), 500
+
+def generate_matches_for_pools():
     match_id = 1
-    for pool in pools:
+    for pool_index, pool in enumerate(pools):
         for i in range(len(pool)):
             for j in range(i + 1, len(pool)):
                 matches.append({
                     "id": match_id,
+                    "poule": pool_index + 1,
                     "blue_team": pool[i],
                     "green_team": pool[j],
                     "blue_score": 0,
@@ -189,13 +322,15 @@ def distribute_teams_and_create_matches(teams):
                 })
                 match_id += 1
 
-@server.route("/distribute_teams", methods=["POST"])
-def distribute_teams():
+@server.route("/generate_matches", methods=["POST"])
+def generate_matches():
     try:
-        distribute_teams_and_create_matches(teams)
-        return jsonify({"message": "Teams distributed successfully"}), 200
+        matches.clear()  # Clear existing matches before creating new ones
+        generate_matches_for_pools()
+        save_data()
+        return jsonify({"message": "Matches generated successfully"}), 200
     except Exception as e:
-        return jsonify({"message": "Error distributing teams"}), 500
+        return jsonify({"message": "Error generating matches"}), 500
 
 @server.route("/add_team", methods=["POST"])
 def add_team():
@@ -203,13 +338,26 @@ def add_team():
         team_name = request.form.get("team_name")
         if team_name:
             teams.append(team_name)
-
-            distribute_teams_and_create_matches(teams)
-            return jsonify({"message": "Team added and matches created successfully"}), 200
+            save_data()
+            return jsonify({"message": "Team added successfully"}), 200
         else:
             return jsonify({"message": "Invalid team name"}), 400
     except Exception as e:
         return jsonify({"message": "Error adding team"}), 500
+
+@server.route("/delete_team", methods=["POST"])
+def delete_team():
+    try:
+        data = request.get_json()
+        team_name = data.get("team_name")
+        if team_name in teams:
+            teams.remove(team_name)
+            save_data()
+            return jsonify({"message": "Team deleted successfully"}), 200
+        else:
+            return jsonify({"message": "Team not found"}), 404
+    except Exception as e:
+        return jsonify({"message": "Error deleting team"}), 500
 
 @server.route("/update_score", methods=["POST"])
 def update_score():
@@ -224,6 +372,7 @@ def update_score():
             match["green_score"] = data.get("green_score", match["green_score"])
             match["green_team"] = data.get("green_name", match["green_team"])
             match["timer"] = data.get("timer", match.get("timer", 0))
+            save_data()
             return jsonify({"message": "Scores, names, and timer updated"}), 200
         else:
             return jsonify({"message": "Match not found"}), 404
@@ -237,6 +386,7 @@ def set_team_name():
         data = request.form
         team_info["blue"]["name"] = data.get("blue_name", team_info["blue"]["name"])
         team_info["green"]["name"] = data.get("green_name", team_info["green"]["name"])
+        save_data()
         return jsonify({"message": "Team names updated successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error updating team names"}), 500
@@ -292,6 +442,7 @@ def add_update_match():
             new_id = max(match["id"] for match in matches) + 1 if matches else 1
             matches.append({"id": new_id, "blue_team": blue_team, "green_team": green_team, "blue_score": 0, "green_score": 0, "status": "upcoming", "match_time": match_time})
         
+        save_data()
         return jsonify({"message": "Match added/updated successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error adding/updating match"}), 500
@@ -305,6 +456,7 @@ def start_match():
             if match["id"] == match_id:
                 match["status"] = "ongoing"
                 break
+        save_data()
         return jsonify({"message": "Match started successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error starting match"}), 500
@@ -321,6 +473,7 @@ def end_match():
                 match["green_score"] = team_info["green"]["score"]
                 match["timer"] = team_info["timer"]
                 break
+        save_data()
         return jsonify({"message": "Match ended successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500

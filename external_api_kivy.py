@@ -26,10 +26,10 @@ class MatchApp(App):
 
     def fetch_matches(self):
         try:
-            response = requests.get("https://app-rsk.onrender.com/get_matches")
+            response = requests.get("http://localhost:5000/get_matches")
             response.raise_for_status()
             matches = response.json()
-            self.match_spinner.values = [f"{match['id']}: {match['blue_team']} vs {match['green_team']}" for match in matches ]
+            self.match_spinner.values = [f"{match['id']}: {match['blue_team']} vs {match['green_team']}" for match in matches]
         except requests.exceptions.RequestException as e:
             logging.error(f"Error fetching matches: {e}")
 
@@ -42,7 +42,7 @@ class MatchApp(App):
 
     def update_team_info(self, match_id):
         try:
-            response = requests.get(f"https://app-rsk.onrender.com/get_team_info?match_id={match_id}")
+            response = requests.get(f"http://localhost:5000/get_team_info?match_id={match_id}")
             response.raise_for_status()
             team_info = response.json()
             self.info_label.text = (f"Blue Team Name: {team_info['blue']['name']}\n"

@@ -44,7 +44,7 @@ class MatchSelectorApp(App):
     
     def update_matches(self):
         try:
-            response = requests.get("https://app-rsk.onrender.com/get_matches")
+            response = requests.get("http://localhost:5000/get_matches")
             response.raise_for_status()
             matches = response.json()
             ongoing_matches = [f"{match['id']}: {match['blue_team']} vs {match['green_team']}" for match in matches if match['status'] == 'ongoing']
@@ -74,7 +74,7 @@ def send_score(match_id):
             green_score = client.referee["teams"]["green"]["score"]
             green_name = client.referee["teams"]["green"]["name"]
             timer = format_timer(client.referee["timer"])
-            response = requests.post("https://app-rsk.onrender.com/update_score", json={
+            response = requests.post("http://localhost:5000/update_score", json={
                 "match_id": match_id,
                 "blue_score": blue_score, 
                 "blue_name": blue_name,
