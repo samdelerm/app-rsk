@@ -68,23 +68,36 @@ def send_score(match_id):
     global stop_sending
     stop_sending = False
     client = rsk.Client()
+    
+    # Fetch match info to update team names
+    try:
+        response = requests.get(f"https://app-rsk.onrender.com/get_team_info?match_id={match_id}")
+        response.raise_for_status()
+        team_info = response.json()
+        client.referee["teams"]["blue"]["name"] = team_info["blue"]["name"]
+        client.referee["teams"]["green"]["name"] = team_info["green"]["name"]
+        logging.info(f"Updated team names: Blue - {team_info['blue']['name']}, Green - {team_info['green']['name']}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching team info: {e}")
+        return
+    
     while not stop_sending:
         try:
             blue_score = client.referee["teams"]["blue"]["score"]
-            blue_name = client.referee["teams"]["blue"]["name"]
+            #blue_name = client.referee["teams"]["blue"]["name"]
             green_score = client.referee["teams"]["green"]["score"]
-            green_name = client.referee["teams"]["green"]["name"]
+            #green_name = client.referee["teams"]["green"]["name"]
             timer = format_timer(client.referee["timer"])
             response = requests.post("https://app-rsk.onrender.com/update_score", json={
                 "match_id": match_id,
                 "blue_score": blue_score, 
-                "blue_name": blue_name,
+                #"blue_name": blue_name,
                 "green_score": green_score,
-                "green_name": green_name,
+                #"green_name": green_name,
                 "timer": timer
             })
             response.raise_for_status()
-            logging.info(f"Scores, names, and timer sent: Blue - {blue_score}, {blue_name}; Green - {green_score}, {green_name}; Timer - {timer}")
+            logging.info(f"Scores, names, and timer sent: Blue - {blue_score}, Green - {green_score},; Timer - {timer}")
         except requests.exceptions.RequestException as e:
             logging.error(f"Error sending scores, names, and timer: {e}")
         except KeyError as e:

@@ -11,7 +11,7 @@ team_info = {
 
 matches = []
 teams = []
-pools = [[], [], [], []]
+pools = [[], [], [],[] ]
 
 def load_data():
     global matches, teams, pools
@@ -29,7 +29,7 @@ def load_data():
         with open('pools.json', 'r') as f:
             pools = json.load(f)
     except FileNotFoundError:
-        pools = [[], [], [], []]
+        pools = [[], [], [],[]]
 
 def save_data():
     with open('matches.json', 'w') as f:
@@ -43,7 +43,7 @@ def reset_data():
     global matches, teams, pools
     matches = []
     teams = []
-    pools = [[], [], [], []]
+    pools = [[], [], [],[]]
     save_data()
 
 load_data()
@@ -149,6 +149,16 @@ index_html = """
         .start-button:hover {
             background-color: #0056b3;
         }
+        .end-button {
+            background-color: #17a2b8;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .end-button:hover {
+            background-color: #138496;
+        }
     </style>
     <script>
         function submitForm(event, formId) {
@@ -197,6 +207,22 @@ index_html = """
 
         function startMatch(matchId) {
             fetch('/start_match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ match_id: matchId })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.message) {
+                      alert(data.message);
+                  }
+                  window.location.reload();
+              }).catch(error => console.error('Error:', error));
+        }
+
+        function endMatch(matchId) {
+            fetch('/end_match', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -265,6 +291,8 @@ index_html = """
                 <td>
                     {% if match.status == 'upcoming' %}
                     <button class="start-button" onclick="startMatch({{ match.id }})">Start Match</button>
+                    {% elif match.status == 'ongoing' %}
+                    <button class="end-button" onclick="endMatch({{ match.id }})">End Match</button>
                     {% endif %}
                 </td>
             </tr>
@@ -351,7 +379,7 @@ def index():
 def distribute_teams_into_pools(teams):
     import random
     random.shuffle(teams)
-    num_pools = min(4, max(1, len(teams) // 3))  # Create up to 4 pools of 3 teams each, at least 1 pool
+    num_pools = min(4, max(2, len(teams) // 3))  # Create up to 4 pools of 3 teams each, at least 1 pool
     for i in range(num_pools):
         pools[i] = teams[i::num_pools]
 
@@ -537,16 +565,18 @@ def start_match():
 def end_match():
     global matches
     try:
-        match_id = int(request.form.get("match_id"))
-        for match in matches:
-            if match["id"] == match_id:
-                match["status"] = "completed"
-                match["blue_score"] = team_info["blue"]["score"]
-                match["green_score"] = team_info["green"]["score"]
-                match["timer"] = team_info["timer"]
-                break
-        save_data()
-        return jsonify({"message": "Match ended successfully"}), 200
+        data = request.get_json()
+        match_id = data.get("match_id")
+        match = next((m for m in matches if m["id"] == int(match_id)), None)
+        if match:
+            match["status"] = "completed"
+            match["blue_score"] = team_info["blue"]["score"]
+            match["green_score"] = team_info["green"]["score"]
+            match["timer"] = team_info["timer"]
+            save_data()
+            return jsonify({"message": "Match ended successfully"}), 200
+        else:
+            return jsonify({"message": "Match not found"}), 404
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500
 
