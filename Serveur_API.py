@@ -529,7 +529,7 @@ def start_match():
         save_data()
         return jsonify({"message": "Match started successfully"}), 200
     except Exception as e:
-        return jsonify({"message": "Error starting match"}), 500
+        return jsonify({f"message": "Error starting match  {e}" }), 500
 
 @server.route("/end_match", methods=["POST"])
 def end_match():
