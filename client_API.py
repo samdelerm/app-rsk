@@ -51,6 +51,7 @@ class MatchSelectorApp(App):
             self.spinner.values = ongoing_matches
         except requests.exceptions.RequestException as e:
             logging.error(f"Error fetching matches: {e}")
+        time.sleep(0.1)
     
     def start_sending_scores(self, instance):
         selected_match = self.spinner.text

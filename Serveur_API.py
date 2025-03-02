@@ -521,15 +521,17 @@ def add_update_match():
 def start_match():
     global matches
     try:
-        match_id = int(request.form.get("match_id"))
-        for match in matches:
-            if match["id"] == match_id:
-                match["status"] = "ongoing"
-                break
-        save_data()
-        return jsonify({"message": "Match started successfully"}), 200
+        data = request.get_json()
+        match_id = data.get("match_id")
+        match = next((m for m in matches if m["id"] == int(match_id)), None)
+        if match:
+            match["status"] = "ongoing"
+            save_data()
+            return jsonify({"message": "Match started successfully"}), 200
+        else:
+            return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        return jsonify({f"message": "Error starting match  {e}" }), 500
+        return jsonify({"message": "Error starting match"}), 500
 
 @server.route("/end_match", methods=["POST"])
 def end_match():
