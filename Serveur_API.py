@@ -139,6 +139,16 @@ index_html = """
         .reset-button:hover {
             background-color: #e0a800;
         }
+        .start-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .start-button:hover {
+            background-color: #0056b3;
+        }
     </style>
     <script>
         function submitForm(event, formId) {
@@ -176,6 +186,22 @@ index_html = """
         function resetData() {
             fetch('/reset_data', {
                 method: 'POST'
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.message) {
+                      alert(data.message);
+                  }
+                  window.location.reload();
+              }).catch(error => console.error('Error:', error));
+        }
+
+        function startMatch(matchId) {
+            fetch('/start_match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ match_id: matchId })
             }).then(response => response.json())
               .then(data => {
                   if (data.message) {
@@ -223,6 +249,7 @@ index_html = """
                 <th>Blue Score</th>
                 <th>Green Score</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -235,6 +262,11 @@ index_html = """
                 <td>{{ match.blue_score }}</td>
                 <td>{{ match.green_score }}</td>
                 <td>{{ match.status }}</td>
+                <td>
+                    {% if match.status == 'upcoming' %}
+                    <button class="start-button" onclick="startMatch({{ match.id }})">Start Match</button>
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
