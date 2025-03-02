@@ -39,6 +39,13 @@ def save_data():
     with open('pools.json', 'w') as f:
         json.dump(pools, f)
 
+def reset_data():
+    global matches, teams, pools
+    matches = []
+    teams = []
+    pools = [[], [], [], []]
+    save_data()
+
 load_data()
 
 # HTML template for index.html
@@ -122,6 +129,16 @@ index_html = """
         .delete-button:hover {
             background-color: #c82333;
         }
+        .reset-button {
+            background-color: #ffc107;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .reset-button:hover {
+            background-color: #e0a800;
+        }
     </style>
     <script>
         function submitForm(event, formId) {
@@ -147,6 +164,18 @@ index_html = """
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ team_name: teamName })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.message) {
+                      alert(data.message);
+                  }
+                  window.location.reload();
+              }).catch(error => console.error('Error:', error));
+        }
+
+        function resetData() {
+            fetch('/reset_data', {
+                method: 'POST'
             }).then(response => response.json())
               .then(data => {
                   if (data.message) {
@@ -259,6 +288,7 @@ index_html = """
             <li>{{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button></li>
         {% endfor %}
     </ul>
+    <button class="reset-button" onclick="resetData()">Reset Data</button>
 </body>
 </html>
 """
@@ -358,6 +388,14 @@ def delete_team():
             return jsonify({"message": "Team not found"}), 404
     except Exception as e:
         return jsonify({"message": "Error deleting team"}), 500
+
+@server.route("/reset_data", methods=["POST"])
+def reset_data_route():
+    try:
+        reset_data()
+        return jsonify({"message": "Data reset successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": "Error resetting data"}), 500
 
 @server.route("/update_score", methods=["POST"])
 def update_score():
