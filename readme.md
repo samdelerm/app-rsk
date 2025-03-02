@@ -5,7 +5,7 @@ par défaut, l'interface se lancera en 127.0.0.1:5000 et sur 0.0.0.0:5000 ( votr
 
 pour l'envoie du score depuis le GC :
 1. installer python (<3.13)
-2. installer rsk et kivy ( pip install robot-soccer-kit[gc] kivyMD )
+2. installer rsk et kivy ( pip install robot-soccer-kit[gc] kivy)
 3. lancer client_API ( python client_API.py)
 4. run un match sur le serveur
 5. selectionner le match en question sur l'interface client
