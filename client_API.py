@@ -14,7 +14,11 @@ import threading
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+HOST=""
+
+
 # API Client : Récupère le score et l'envoie au serveur
+
 
 def format_timer(seconds):
     minutes = seconds // 60
@@ -67,7 +71,7 @@ class MatchSelectorApp(App):
 def send_score(match_id):
     global stop_sending
     stop_sending = False
-    client = rsk.Client()
+    client = rsk.Client(HOST)
     
     # Fetch match info to update team names
     try:
