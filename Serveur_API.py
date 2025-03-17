@@ -1,4 +1,5 @@
 import json
+import os
 from flask import Flask, request, jsonify, render_template
 
 # API Serveur : Stocke les infos et gère les requêtes
@@ -13,7 +14,7 @@ matches = []
 teams = []
 pools = [[], [], [],[] ]
 
-PASSWORD = "your_password_here"
+PASSWORD = os.getenv("APP_PASSWORD", "default_password")
 
 def load_data():
     global matches, teams, pools
