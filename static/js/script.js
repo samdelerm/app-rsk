@@ -108,6 +108,7 @@ function login(event) {
     }).then(response => response.json())
       .then(data => {
           if (data.success) {
+              localStorage.setItem('loggedIn', 'true');
               document.getElementById('login-form').style.display = 'none';
               document.getElementById('main-content').style.display = 'block';
           } else {
@@ -115,3 +116,10 @@ function login(event) {
           }
       }).catch(error => console.error('Error:', error));
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('loggedIn') === 'true') {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    }
+});
