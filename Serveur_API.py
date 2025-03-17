@@ -1,6 +1,6 @@
 import json
-from flask import Flask, request, jsonify, render_template_string
-
+from flask import Flask, request, jsonify, render_template
+URLBASE="/orga"
 # API Serveur : Stocke les infos et gère les requêtes
 server = Flask(__name__)
 team_info = {
@@ -49,309 +49,7 @@ def reset_data():
 load_data()
 
 # HTML template for index.html
-index_html = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Match Info</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background: #fff;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        input[type="text"], input[type="datetime-local"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .delete-button {
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .delete-button:hover {
-            background-color: #c82333;
-        }
-        .reset-button {
-            background-color: #ffc107;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .reset-button:hover {
-            background-color: #e0a800;
-        }
-        .start-button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .start-button:hover {
-            background-color: #0056b3;
-        }
-        .end-button {
-            background-color: #17a2b8;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .end-button:hover {
-            background-color: #138496;
-        }
-    </style>
-    <script>
-        function submitForm(event, formId) {
-            event.preventDefault();
-            const form = document.getElementById(formId);
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: form.method,
-                body: formData
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.message) {
-                      alert(data.message);
-                  }
-                  window.location.reload();
-              }).catch(error => console.error('Error:', error));
-        }
 
-        function deleteTeam(teamName) {
-            fetch('/delete_team', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ team_name: teamName })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.message) {
-                      alert(data.message);
-                  }
-                  window.location.reload();
-              }).catch(error => console.error('Error:', error));
-        }
-
-        function resetData() {
-            fetch('/reset_data', {
-                method: 'POST'
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.message) {
-                      alert(data.message);
-                  }
-                  window.location.reload();
-              }).catch(error => console.error('Error:', error));
-        }
-
-        function startMatch(matchId) {
-            fetch('/start_match', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ match_id: matchId })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.message) {
-                      alert(data.message);
-                  }
-                  window.location.reload();
-              }).catch(error => console.error('Error:', error));
-        }
-
-        function endMatch(matchId) {
-            fetch('/end_match', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ match_id: matchId })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.message) {
-                      alert(data.message);
-                  }
-                  window.location.reload();
-              }).catch(error => console.error('Error:', error));
-        }
-    </script>
-</head>
-<body>
-    <h1>Match Info</h1>
-    <h2>Matches</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Poule 1</th>
-                <th>Poule 2</th>
-                <th>Poule 3</th>
-                <th>Poule 4</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in range(max(len(pools[0]), len(pools[1]), len(pools[2]), len(pools[3]))) %}
-            <tr>
-                {% for j in range(4) %}
-                <td>
-                    {% if i < len(pools[j]) %}
-                    {{ pools[j][i] }}
-                    {% endif %}
-                </td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h2>Generated Matches</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Match ID</th>
-                <th>Poule</th>
-                <th>Blue Team</th>
-                <th>Green Team</th>
-                <th>Blue Score</th>
-                <th>Green Score</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-            <tr>
-                <td>{{ match.id }}</td>
-                <td>{{ match.poule }}</td>
-                <td>{{ match.blue_team }}</td>
-                <td>{{ match.green_team }}</td>
-                <td>{{ match.blue_score }}</td>
-                <td>{{ match.green_score }}</td>
-                <td>{{ match.status }}</td>
-                <td>
-                    {% if match.status == 'upcoming' %}
-                    <button class="start-button" onclick="startMatch({{ match.id }})">Start Match</button>
-                    {% elif match.status == 'ongoing' %}
-                    <button class="end-button" onclick="endMatch({{ match.id }})">End Match</button>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h2>Add Team</h2>
-    <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')">
-        <label for="team_name">Team Name:</label>
-        <input type="text" id="team_name" name="team_name">
-        <button type="submit">Add Team</button>
-    </form>
-    <h2>Generate Pools</h2>
-    <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')">
-        <button type="submit">Generate</button>
-    </form>
-    {% if pools[0] or pools[1] or pools[2] or pools[3] %}
-    <h2>Generate Matches</h2>
-    <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')">
-        <button type="submit">Generate Matches</button>
-    </form>
-    {% endif %}
-    <h2>Update Team Name</h2>
-    <form id="set_team_name" action="/set_team_name" method="post" onsubmit="submitForm(event, 'set_team_name')">
-        <label for="blue_name">Blue Team Name:</label>
-        <input type="text" id="blue_name" name="blue_name">
-        <label for="green_name">Green Team Name:</label>
-        <input type="text" id="green_name" name="green_name">
-        <button type="submit">Update</button>
-    </form>
-    <h2>Team Standings</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Team</th>
-                <th>Wins</th>
-                <th>Losses</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for team, record in standings.items() %}
-                <tr>
-                    <td>{{ team }}</td>
-                    <td>{{ record.wins }}</td>
-                    <td>{{ record.losses }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h2>Teams</h2>
-    <ul>
-        {% for team in teams %}
-            <li>{{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button></li>
-        {% endfor %}
-    </ul>
-    <button class="reset-button" onclick="resetData()">Reset Data</button>
-</body>
-</html>
-"""
 
 def calculate_standings():
     standings = {}
@@ -371,10 +69,10 @@ def calculate_standings():
                 standings[green_team]["wins"] += 1
     return standings
 
-@server.route("/")
+@server.route(f"{URLBASE}/")
 def index():
     standings = calculate_standings()
-    return render_template_string(index_html, team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
+    return render_template('index.html', team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
 
 def distribute_teams_into_pools(teams):
     import random
@@ -383,7 +81,7 @@ def distribute_teams_into_pools(teams):
     for i in range(num_pools):
         pools[i] = teams[i::num_pools]
 
-@server.route("/generate_pools", methods=["POST"])
+@server.route(f"{URLBASE}/generate_pools", methods=["POST"])
 def generate_pools():
     try:
         if len(teams) < 2:
@@ -412,7 +110,7 @@ def generate_matches_for_pools():
                 })
                 match_id += 1
 
-@server.route("/generate_matches", methods=["POST"])
+@server.route(f"{URLBASE}/generate_matches", methods=["POST"])
 def generate_matches():
     try:
         matches.clear()  # Clear existing matches before creating new ones
@@ -422,7 +120,7 @@ def generate_matches():
     except Exception as e:
         return jsonify({"message": "Error generating matches"}), 500
 
-@server.route("/add_team", methods=["POST"])
+@server.route(f"{URLBASE}/add_team", methods=["POST"])
 def add_team():
     try:
         team_name = request.form.get("team_name")
@@ -435,7 +133,7 @@ def add_team():
     except Exception as e:
         return jsonify({"message": "Error adding team"}), 500
 
-@server.route("/delete_team", methods=["POST"])
+@server.route(f"{URLBASE}/delete_team", methods=["POST"])
 def delete_team():
     try:
         data = request.get_json()
@@ -449,7 +147,7 @@ def delete_team():
     except Exception as e:
         return jsonify({"message": "Error deleting team"}), 500
 
-@server.route("/reset_data", methods=["POST"])
+@server.route(f"{URLBASE}/reset_data", methods=["POST"])
 def reset_data_route():
     try:
         reset_data()
@@ -457,7 +155,7 @@ def reset_data_route():
     except Exception as e:
         return jsonify({"message": "Error resetting data"}), 500
 
-@server.route("/update_score", methods=["POST"])
+@server.route(f"{URLBASE}/update_score", methods=["POST"])
 def update_score():
     global matches
     try:
@@ -477,7 +175,7 @@ def update_score():
     except Exception as e:
         return jsonify({"message": "Error updating scores, names, and timer"}), 500
 
-@server.route("/set_team_name", methods=["POST"])
+@server.route(f"{URLBASE}/set_team_name", methods=["POST"])
 def set_team_name():
     global team_info
     try:
@@ -489,7 +187,7 @@ def set_team_name():
     except Exception as e:
         return jsonify({"message": "Error updating team names"}), 500
 
-@server.route("/get_team_info", methods=["GET"])
+@server.route(f"{URLBASE}/get_team_info", methods=["GET"])
 def get_team_info():
     match_id = request.args.get("match_id")
     try:
@@ -508,14 +206,14 @@ def get_team_info():
     except Exception as e:
         return jsonify({"message": "Error fetching team info"}), 500
 
-@server.route("/get_matches", methods=["GET"])
+@server.route(f"{URLBASE}/get_matches", methods=["GET"])
 def get_matches():
     try:
         return jsonify(matches), 200
     except Exception as e:
         return jsonify({"message": "Error fetching matches"}), 500
 
-@server.route("/add_update_match", methods=["POST"])
+@server.route(f"{URLBASE}/add_update_match", methods=["POST"])
 def add_update_match():
     global matches
     try:
@@ -545,7 +243,7 @@ def add_update_match():
     except Exception as e:
         return jsonify({"message": "Error adding/updating match"}), 500
 
-@server.route("/start_match", methods=["POST"])
+@server.route(f"{URLBASE}/start_match", methods=["POST"])
 def start_match():
     global matches
     try:
@@ -561,7 +259,7 @@ def start_match():
     except Exception as e:
         return jsonify({"message": "Error starting match"}), 500
 
-@server.route("/end_match", methods=["POST"])
+@server.route(f"{URLBASE}/end_match", methods=["POST"])
 def end_match():
     global matches
     try:
@@ -579,6 +277,14 @@ def end_match():
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
+
+
+app_with_prefix = DispatcherMiddleware(Flask('dummy_app'), {
+    f'{URLBASE}': server
+})
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", debug=True, port=5000)
+    from werkzeug.serving import run_simple
+    run_simple("127.0.0.1", 5000, app_with_prefix)
+    #server.run(host='0.0.0.0', port=5000, debug=True)
