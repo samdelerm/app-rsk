@@ -13,6 +13,8 @@ matches = []
 teams = []
 pools = [[], [], [],[] ]
 
+PASSWORD = "your_password_here"
+
 def load_data():
     global matches, teams, pools
     try:
@@ -47,8 +49,6 @@ def reset_data():
     save_data()
 
 load_data()
-
-
 
 def calculate_standings():
     standings = {}
@@ -288,6 +288,14 @@ def update_match_time():
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
         return jsonify({"message": "Error updating match time"}), 500
+
+@server.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    if data.get("password") == PASSWORD:
+        return jsonify({"success": True}), 200
+    else:
+        return jsonify({"success": False}), 401
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", debug=True, port=5000)

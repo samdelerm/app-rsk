@@ -10,134 +10,141 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Match Infos</h1>
-        </header>
-        <section>
-            <h2>Matchs</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Poule 1</th>
-                        <th>Poule 2</th>
-                        <th>Poule 3</th>
-                        <th>Poule 4</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in range(max(len(pools[0]), len(pools[1]), len(pools[2]), len(pools[3]))) %}
-                    <tr>
-                        {% for j in range(4) %}
-                        <td>
-                            {% if i < len(pools[j]) %}
-                            {{ pools[j][i] }}
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-        <section>
-            <h2>Generated Matchs</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Match ID</th>
-                        <th>Poule</th>
-                        <th>Blue Team</th>
-                        <th>Green Team</th>
-                        <th>Blue Score</th>
-                        <th>Green Score</th>
-                        <th>Status</th>
-                        <th>Match Time</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in matches %}
-                    <tr>
-                        <td>{{ match.id }}</td>
-                        <td>{{ match.poule }}</td>
-                        <td>{{ match.blue_team }}</td>
-                        <td>{{ match.green_team }}</td>
-                        <td>{{ match.blue_score }}</td>
-                        <td>{{ match.green_score }}</td>
-                        <td>{{ match.status }}</td>
-                        <td>
-                            <input type="datetime-local" value="{{ match.match_time }}" onchange="updateMatchTime('{{ match.id }}', this.value)">
-                        </td>
-                        <td>
-                            {% if match.status == 'upcoming' %}
-                            <button class="start-button" onclick="startMatch('{{ match.id }}')">Start Match</button>
-                            {% elif match.status == 'ongoing' %}
-                            <button class="end-button" onclick="endMatch('{{ match.id }}')">End Match</button>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
-        <section>
-            <h2>Add Team</h2>
-            <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')">
-                <label for="team_name">Team Name:</label>
-                <input type="text" id="team_name" name="team_name">
-                <button type="submit">Add Team</button>
-            </form>
-        </section>
-        <section>
-            <h2>Generate Pools</h2>
-            <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')">
-                <button type="submit">Generate</button>
-            </form>
-        </section>
-        {% if pools[0] or pools[1] or pools[2] or pools[3] %}
-        <section>
-            <h2>Generate Matches</h2>
-            <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')">
-                <button type="submit">Generate Matches</button>
-            </form>
-        </section>
-        {% endif %}
-        <section>
-            <h2>Team Standings</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Wins</th>
-                        <th>Losses</th>
-                        <th>Draws</th>
-                        <th>Goal Average</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team, record in standings.items() %}
+        <form id="login-form" onsubmit="login(event)">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="main-content" style="display: none;">
+            <header>
+                <h1>Match Infos</h1>
+            </header>
+            <section>
+                <h2>Matchs</h2>
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ team }}</td>
-                            <td>{{ record.wins }}</td>
-                            <td>{{ record.losses }}</td>
-                            <td>{{ record.draws }}</td>
-                            <td>{{ record.goal_average }}</td>
+                            <th>Poule 1</th>
+                            <th>Poule 2</th>
+                            <th>Poule 3</th>
+                            <th>Poule 4</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(max(len(pools[0]), len(pools[1]), len(pools[2]), len(pools[3]))) %}
+                        <tr>
+                            {% for j in range(4) %}
+                            <td>
+                                {% if i < len(pools[j]) %}
+                                {{ pools[j][i] }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Generated Matchs</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Match ID</th>
+                            <th>Poule</th>
+                            <th>Blue Team</th>
+                            <th>Green Team</th>
+                            <th>Blue Score</th>
+                            <th>Green Score</th>
+                            <th>Status</th>
+                            <th>Match Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in matches %}
+                        <tr>
+                            <td>{{ match.id }}</td>
+                            <td>{{ match.poule }}</td>
+                            <td>{{ match.blue_team }}</td>
+                            <td>{{ match.green_team }}</td>
+                            <td>{{ match.blue_score }}</td>
+                            <td>{{ match.green_score }}</td>
+                            <td>{{ match.status }}</td>
+                            <td>
+                                <input type="datetime-local" value="{{ match.match_time }}" onchange="updateMatchTime('{{ match.id }}', this.value)">
+                            </td>
+                            <td>
+                                {% if match.status == 'upcoming' %}
+                                <button class="start-button" onclick="startMatch('{{ match.id }}')">Start Match</button>
+                                {% elif match.status == 'ongoing' %}
+                                <button class="end-button" onclick="endMatch('{{ match.id }}')">End Match</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Add Team</h2>
+                <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')">
+                    <label for="team_name">Team Name:</label>
+                    <input type="text" id="team_name" name="team_name">
+                    <button type="submit">Add Team</button>
+                </form>
+            </section>
+            <section>
+                <h2>Generate Pools</h2>
+                <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')">
+                    <button type="submit">Generate</button>
+                </form>
+            </section>
+            {% if pools[0] or pools[1] or pools[2] or pools[3] %}
+            <section>
+                <h2>Generate Matches</h2>
+                <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')">
+                    <button type="submit">Generate Matches</button>
+                </form>
+            </section>
+            {% endif %}
+            <section>
+                <h2>Team Standings</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Draws</th>
+                            <th>Goal Average</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team, record in standings.items() %}
+                            <tr>
+                                <td>{{ team }}</td>
+                                <td>{{ record.wins }}</td>
+                                <td>{{ record.losses }}</td>
+                                <td>{{ record.draws }}</td>
+                                <td>{{ record.goal_average }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h2>Teams</h2>
+                <ul>
+                    {% for team in teams %}
+                        <li>
+                            {{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button>
+                        </li>
                     {% endfor %}
-                </tbody>
-            </table>
-        </section>
-        <section>
-            <h2>Teams</h2>
-            <ul>
-                {% for team in teams %}
-                    <li>
-                        {{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button>
-                    </li>
-                {% endfor %}
-            </ul>
-            <button class="reset-button" onclick="resetData()">Reset Data</button>
-        </section>
+                </ul>
+                <button class="reset-button" onclick="resetData()">Reset Data</button>
+            </section>
+        </div>
     </div>
 </body>
 </html>

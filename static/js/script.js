@@ -95,3 +95,23 @@ function updateMatchTime(matchId, matchTime) {
           window.location.reload();
       }).catch(error => console.error('Error:', error));
 }
+
+function login(event) {
+    event.preventDefault();
+    const password = document.getElementById('password').value;
+    fetch(URLBASE + '/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: password })
+    }).then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              document.getElementById('login-form').style.display = 'none';
+              document.getElementById('main-content').style.display = 'block';
+          } else {
+              alert('Incorrect password');
+          }
+      }).catch(error => console.error('Error:', error));
+}
