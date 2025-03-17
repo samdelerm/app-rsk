@@ -1,4 +1,4 @@
-URLBASE = "/orga";
+URLBASE = "";
 
 function submitForm(event, formId) {
     event.preventDefault();
@@ -71,6 +71,22 @@ function endMatch(matchId) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ match_id: matchId })
+    }).then(response => response.json())
+      .then(data => {
+          if (data.message) {
+              alert(data.message);
+          }
+          window.location.reload();
+      }).catch(error => console.error('Error:', error));
+}
+
+function updateMatchTime(matchId, matchTime) {
+    fetch(URLBASE + '/update_match_time', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ match_id: matchId, match_time: matchTime })
     }).then(response => response.json())
       .then(data => {
           if (data.message) {
