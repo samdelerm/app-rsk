@@ -11,6 +11,7 @@
 <body>
     <div class="container">
         <form id="login-form" onsubmit="login(event)">
+            <h2>Login</h2>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Login</button>
@@ -21,7 +22,7 @@
             </header>
             <section>
                 <h2>Matchs</h2>
-                <table>
+                <table class="styled-table">
                     <thead>
                         <tr>
                             <th>Poule 1</th>
@@ -47,7 +48,7 @@
             </section>
             <section>
                 <h2>Generated Matchs</h2>
-                <table>
+                <table class="styled-table">
                     <thead>
                         <tr>
                             <th>Match ID</th>
@@ -110,7 +111,7 @@
             {% endif %}
             <section>
                 <h2>Team Standings</h2>
-                <table>
+                <table class="styled-table">
                     <thead>
                         <tr>
                             <th>Team</th>
@@ -135,7 +136,7 @@
             </section>
             <section>
                 <h2>Teams</h2>
-                <ul>
+                <ul class="team-list">
                     {% for team in teams %}
                         <li>
                             {{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button>
