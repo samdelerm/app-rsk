@@ -1,70 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Match Viewer</title>
+    <title>Visionneuse de Matchs</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <script src="/static/js/user_interface.js"></script>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <img src="/static/Ballon_tr2.png" alt="Tournament Logo" class="logo">
-            <h1>Futuristic Match Viewer</h1>
+            <img src="/static/Ballon_tr2.png" alt="Logo du Tournoi" class="logo">
+            <h1>Visionneuse de Matchs</h1>
         </header>
         <section class="card">
-            <h2>Select Match</h2>
+            <h2>Sélectionner un Match</h2>
             <select id="match-selector" class="dropdown" onchange="fetchMatchInfo()">
-                <option value="">Select Match</option>
+                <option value="">Sélectionner un Match</option>
                 {% for match in matches %}
-                <option value="{{ match.id }}">Match {{ match.id }}: {{ match.blue_team }} vs {{ match.green_team }}</option>
+                <option value="{{ match.id }}">Match {{ match.id }} : {{ match.blue_team }} vs {{ match.green_team }}</option>
                 {% endfor %}
             </select>
         </section>
         <section class="card">
-            <h2>Match Information</h2>
+            <h2>Informations du Match</h2>
             <div id="match-info">
                 <div class="info-row">
-                    <span class="info-label">Blue Team:</span>
+                    <span class="info-label">Équipe Bleue :</span>
                     <span id="blue-team" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Blue Score:</span>
+                    <span class="info-label">Score Bleu :</span>
                     <span id="blue-score" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Green Team:</span>
+                    <span class="info-label">Équipe Verte :</span>
                     <span id="green-team" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Green Score:</span>
+                    <span class="info-label">Score Vert :</span>
                     <span id="green-score" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Timer:</span>
+                    <span class="info-label">Chronomètre :</span>
                     <span id="match-timer" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Match Time:</span>
+                    <span class="info-label">Heure du Match :</span>
                     <span id="match-time" class="info-value">N/A</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Status:</span>
+                    <span class="info-label">Statut :</span>
                     <span id="match-status" class="info-value">N/A</span>
                 </div>
             </div>
         </section>
         <section class="card">
-            <h2>Team Standings</h2>
-            <button onclick="fetchStandings()" class="standings-button">Show Current Standings</button>
-            <button onclick="refreshStandings()" class="refresh-button">Refresh Standings</button>
+            <h2>Classement des Équipes</h2>
+            <button onclick="fetchStandings()" class="standings-button">Afficher le Classement</button>
+            <button onclick="refreshStandings()" class="refresh-button">Actualiser le Classement</button>
             <div id="standings-info" class="standings-container">
-                <!-- Standings will be dynamically populated here -->
+                <!-- Le classement sera affiché ici -->
             </div>
         </section>
         <footer class="footer">
-            <p>© 2023 Futuristic Tournament. All rights reserved.</p>
+            <p>© 2023 Tournoi Officiel. Tous droits réservés.</p>
         </footer>
     </div>
 </body>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Official Competition Dashboard</title>
+    <title>Tableau de Bord de la Compétition</title>
     <link rel="icon" type="image/png" href="/static/Ballon_tr2.png">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <script src="/static/js/script.js"></script>
@@ -11,17 +11,17 @@
 <body>
     <div class="container">
         <form id="login-form" onsubmit="login(event)" class="card">
-            <h2>Login</h2>
-            <label for="password">Enter Password:</label>
+            <h2>Connexion</h2>
+            <label for="password">Entrez le mot de passe :</label>
             <input type="password" id="password" name="password" required>
-            <button type="submit">Login</button>
+            <button type="submit">Se connecter</button>
         </form>
         <div id="main-content" class="hidden">
             <header class="header">
-                <h1>Official Competition Dashboard</h1>
+                <h1>Tableau de Bord de la Compétition</h1>
             </header>
             <section>
-                <h2>Match Pools</h2>
+                <h2>Poules</h2>
                 <table class="styled-table">
                     <thead>
                         <tr>
@@ -47,18 +47,18 @@
                 </table>
             </section>
             <section>
-                <h2>Generated Matches</h2>
+                <h2>Matchs Générés</h2>
                 <table class="styled-table">
                     <thead>
                         <tr>
-                            <th>Match ID</th>
+                            <th>ID Match</th>
                             <th>Poule</th>
-                            <th>Blue Team</th>
-                            <th>Green Team</th>
-                            <th>Blue Score</th>
-                            <th>Green Score</th>
-                            <th>Status</th>
-                            <th>Match Time</th>
+                            <th>Équipe Bleue</th>
+                            <th>Équipe Verte</th>
+                            <th>Score Bleu</th>
+                            <th>Score Vert</th>
+                            <th>Statut</th>
+                            <th>Heure du Match</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -77,9 +77,9 @@
                             </td>
                             <td>
                                 {% if match.status == 'upcoming' %}
-                                <button class="start-button" onclick="startMatch('{{ match.id }}')">Start</button>
+                                <button class="start-button" onclick="startMatch('{{ match.id }}')">Démarrer</button>
                                 {% elif match.status == 'ongoing' %}
-                                <button class="end-button" onclick="endMatch('{{ match.id }}')">End</button>
+                                <button class="end-button" onclick="endMatch('{{ match.id }}')">Terminer</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -88,37 +88,37 @@
                 </table>
             </section>
             <section>
-                <h2>Add Team</h2>
+                <h2>Ajouter une Équipe</h2>
                 <form id="add_team" action="/orga/add_team" method="post" onsubmit="submitForm(event, 'add_team')" class="card">
-                    <label for="team_name">Team Name:</label>
-                    <input type="text" id="team_name" name="team_name" placeholder="Enter team name">
-                    <button type="submit">Add Team</button>
+                    <label for="team_name">Nom de l'équipe :</label>
+                    <input type="text" id="team_name" name="team_name" placeholder="Entrez le nom de l'équipe">
+                    <button type="submit">Ajouter</button>
                 </form>
             </section>
             <section>
-                <h2>Generate Pools</h2>
+                <h2>Générer les Poules</h2>
                 <form id="generate_pools" action="/orga/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')" class="card">
-                    <button type="submit">Generate Pools</button>
+                    <button type="submit">Générer les Poules</button>
                 </form>
             </section>
             {% if pools[0] or pools[1] or pools[2] or pools[3] %}
             <section>
-                <h2>Generate Matches</h2>
+                <h2>Générer les Matchs</h2>
                 <form id="generate_matches" action="/orga/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')" class="card">
-                    <button type="submit">Generate Matches</button>
+                    <button type="submit">Générer les Matchs</button>
                 </form>
             </section>
             {% endif %}
             <section>
-                <h2>Team Standings</h2>
+                <h2>Classement des Équipes</h2>
                 <table class="styled-table">
                     <thead>
                         <tr>
-                            <th>Team</th>
-                            <th>Wins</th>
-                            <th>Losses</th>
-                            <th>Draws</th>
-                            <th>Goal Average</th>
+                            <th>Équipe</th>
+                            <th>Victoires</th>
+                            <th>Défaites</th>
+                            <th>Matchs Nuls</th>
+                            <th>Différence de Buts</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,15 +135,15 @@
                 </table>
             </section>
             <section>
-                <h2>Teams</h2>
+                <h2>Équipes</h2>
                 <ul class="team-list">
                     {% for team in teams %}
                         <li>
-                            {{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Delete</button>
+                            {{ team }} <button class="delete-button" onclick="deleteTeam('{{ team }}')">Supprimer</button>
                         </li>
                     {% endfor %}
                 </ul>
-                <button class="reset-button" onclick="resetData()">Reset Data</button>
+                <button class="reset-button" onclick="resetData()">Réinitialiser les Données</button>
             </section>
         </div>
     </div>
