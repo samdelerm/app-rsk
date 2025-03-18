@@ -45,6 +45,49 @@ function clearMatchInfo() {
     document.getElementById("match-time").textContent = "N/A";
 }
 
+function fetchStandings() {
+    fetch("/get_standings")
+        .then(response => response.json())
+        .then(data => {
+            const standingsContainer = document.getElementById("standings-info");
+            standingsContainer.innerHTML = ""; // Clear previous standings
+
+            if (data.message) {
+                standingsContainer.innerHTML = `<p>${data.message}</p>`;
+            } else {
+                const table = document.createElement("table");
+                table.className = "styled-table";
+                const thead = document.createElement("thead");
+                thead.innerHTML = `
+                    <tr>
+                        <th>Team</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Draws</th>
+                        <th>Goal Average</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                for (const [team, record] of Object.entries(data)) {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${team}</td>
+                        <td>${record.wins}</td>
+                        <td>${record.losses}</td>
+                        <td>${record.draws}</td>
+                        <td>${record.goal_average}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                table.appendChild(tbody);
+                standingsContainer.appendChild(table);
+            }
+        })
+        .catch(error => console.error("Error fetching standings:", error));
+}
+
 // Automatically update match info every 0.5 seconds
 setInterval(() => {
     if (currentMatchId) {

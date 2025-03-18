@@ -1,1 +1,1 @@
-[{"id": 1, "poule": 1, "blue_team": "test", "green_team": "test3", "blue_score": 0, "green_score": 0, "status": "upcoming", "match_time": null}]
+[{"id": 1, "poule": 1, "blue_team": "test", "green_team": "test3", "blue_score": 0, "green_score": 0, "status": "completed", "match_time": null, "timer": 0}]

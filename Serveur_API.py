@@ -86,7 +86,7 @@ def distribute_teams_into_pools(teams):
     for i in range(num_pools):
         pools[i] = teams[i::num_pools]
 
-@server.route("/generate_pools", methods=["POST"])
+@server.route("/orga/generate_pools", methods=["POST"])
 def generate_pools():
     try:
         if len(teams) < 2:
@@ -116,7 +116,7 @@ def generate_matches_for_pools(match_time):
                 })
                 match_id += 1
 
-@server.route("/generate_matches", methods=["POST"])
+@server.route("/orga/generate_matches", methods=["POST"])
 def generate_matches():
     try:
         matches.clear()  # Clear existing matches before creating new ones
@@ -127,7 +127,7 @@ def generate_matches():
     except Exception as e:
         return jsonify({"message": "Error generating matches"}), 500
 
-@server.route("/add_team", methods=["POST"])
+@server.route("/orga/add_team", methods=["POST"])
 def add_team():
     try:
         team_name = request.form.get("team_name")
@@ -140,7 +140,7 @@ def add_team():
     except Exception as e:
         return jsonify({"message": "Error adding team"}), 500
 
-@server.route("/delete_team", methods=["POST"])
+@server.route("/orga/delete_team", methods=["POST"])
 def delete_team():
     try:
         data = request.get_json()
@@ -154,7 +154,7 @@ def delete_team():
     except Exception as e:
         return jsonify({"message": "Error deleting team"}), 500
 
-@server.route("/reset_data", methods=["POST"])
+@server.route("/orga/reset_data", methods=["POST"])
 def reset_data_route():
     try:
         reset_data()
@@ -162,7 +162,7 @@ def reset_data_route():
     except Exception as e:
         return jsonify({"message": "Error resetting data"}), 500
 
-@server.route("/update_score", methods=["POST"])
+@server.route("/orga/update_score", methods=["POST"])
 def update_score():
     global matches
     try:
@@ -202,14 +202,14 @@ def get_team_info():
     except Exception as e:
         return jsonify({"message": "Error fetching match info"}), 500
 
-@server.route("/get_matches", methods=["GET"])
+@server.route("/orga/get_matches", methods=["GET"])
 def get_matches():
     try:
         return jsonify(matches), 200
     except Exception as e:
         return jsonify({"message": "Error fetching matches"}), 500
 
-@server.route("/add_update_match", methods=["POST"])
+@server.route("/orga/add_update_match", methods=["POST"])
 def add_update_match():
     global matches
     try:
@@ -239,7 +239,7 @@ def add_update_match():
     except Exception as e:
         return jsonify({"message": "Error adding/updating match"}), 500
 
-@server.route("/start_match", methods=["POST"])
+@server.route("/orga/start_match", methods=["POST"])
 def start_match():
     global matches
     try:
@@ -255,7 +255,7 @@ def start_match():
     except Exception as e:
         return jsonify({"message": "Error starting match"}), 500
 
-@server.route("/end_match", methods=["POST"])
+@server.route("/orga/end_match", methods=["POST"])
 def end_match():
     global matches
     try:
@@ -274,7 +274,7 @@ def end_match():
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500
 
-@server.route("/update_match_time", methods=["POST"])
+@server.route("/orga/update_match_time", methods=["POST"])
 def update_match_time():
     global matches
     try:
@@ -291,7 +291,15 @@ def update_match_time():
     except Exception as e:
         return jsonify({"message": "Error updating match time"}), 500
 
-@server.route("/login", methods=["POST"])
+@server.route("/get_standings", methods=["GET"])
+def get_standings():
+    try:
+        standings = calculate_standings()
+        return jsonify(standings), 200
+    except Exception as e:
+        return jsonify({"message": "Error fetching standings"}), 500
+
+@server.route("/orga/login", methods=["POST"])
 def login():
     data = request.get_json()
     if data.get("password") == PASSWORD:

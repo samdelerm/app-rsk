@@ -143,3 +143,40 @@ th {
 .end-button:hover {
     background-color: #138496;
 }
+.standings-button {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+.standings-button:hover {
+    background-color: #2980b9;
+}
+.standings-container {
+    margin-top: 20px;
+}
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.styled-table th, .styled-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+.styled-table th {
+    background-color: #34495e;
+    color: #ffffff;
+}
+.styled-table tr:hover {
+    background-color: #ecf0f1;
+}
