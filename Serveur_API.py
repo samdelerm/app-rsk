@@ -74,8 +74,8 @@ def calculate_standings():
             standings[green_team]["goal_average"] += match["green_score"] - match["blue_score"]
     return standings
 
-@server.route("/")
-def index():
+@server.route("/orga/interface")
+def organizer_interface():
     standings = calculate_standings()
     return render_template("index.html", team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
 
@@ -299,7 +299,7 @@ def login():
     else:
         return jsonify({"success": False}), 401
 
-@server.route("/user_interface")
+@server.route("/")
 def user_interface():
     return render_template("user_interface.html", matches=matches)
 
