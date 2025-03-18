@@ -142,6 +142,7 @@ th {
 }
 .end-button:hover {
     background-color: #138496;
+    box-shadow: #000000;
 }
 .standings-button {
     padding: 10px 20px;
@@ -172,7 +173,7 @@ th {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    color: #000000;
 }
 .styled-table th {
     background: rgba(0, 212, 255, 0.2);
