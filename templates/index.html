@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Match Info</title>
+    <title>Official Competition Dashboard</title>
     <link rel="icon" type="image/png" href="/static/Ballon_tr2.png">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <script src="/static/js/script.js"></script>
 </head>
 <body>
     <div class="container">
-        <form id="login-form" onsubmit="login(event)">
+        <form id="login-form" onsubmit="login(event)" class="card">
             <h2>Login</h2>
-            <label for="password">Password:</label>
+            <label for="password">Enter Password:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Login</button>
         </form>
         <div id="main-content" class="hidden">
-            <header>
-                <h1>Match Infos</h1>
+            <header class="header">
+                <h1>Official Competition Dashboard</h1>
             </header>
             <section>
-                <h2>Matchs</h2>
+                <h2>Match Pools</h2>
                 <table class="styled-table">
                     <thead>
                         <tr>
@@ -47,7 +47,7 @@
                 </table>
             </section>
             <section>
-                <h2>Generated Matchs</h2>
+                <h2>Generated Matches</h2>
                 <table class="styled-table">
                     <thead>
                         <tr>
@@ -77,9 +77,9 @@
                             </td>
                             <td>
                                 {% if match.status == 'upcoming' %}
-                                <button class="start-button" onclick="startMatch('{{ match.id }}')">Start Match</button>
+                                <button class="start-button" onclick="startMatch('{{ match.id }}')">Start</button>
                                 {% elif match.status == 'ongoing' %}
-                                <button class="end-button" onclick="endMatch('{{ match.id }}')">End Match</button>
+                                <button class="end-button" onclick="endMatch('{{ match.id }}')">End</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -89,22 +89,22 @@
             </section>
             <section>
                 <h2>Add Team</h2>
-                <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')">
+                <form id="add_team" action="/add_team" method="post" onsubmit="submitForm(event, 'add_team')" class="card">
                     <label for="team_name">Team Name:</label>
-                    <input type="text" id="team_name" name="team_name">
+                    <input type="text" id="team_name" name="team_name" placeholder="Enter team name">
                     <button type="submit">Add Team</button>
                 </form>
             </section>
             <section>
                 <h2>Generate Pools</h2>
-                <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')">
-                    <button type="submit">Generate</button>
+                <form id="generate_pools" action="/generate_pools" method="post" onsubmit="submitForm(event, 'generate_pools')" class="card">
+                    <button type="submit">Generate Pools</button>
                 </form>
             </section>
             {% if pools[0] or pools[1] or pools[2] or pools[3] %}
             <section>
                 <h2>Generate Matches</h2>
-                <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')">
+                <form id="generate_matches" action="/generate_matches" method="post" onsubmit="submitForm(event, 'generate_matches')" class="card">
                     <button type="submit">Generate Matches</button>
                 </form>
             </section>

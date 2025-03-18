@@ -41,7 +41,7 @@ label {
 }
 input[type="text"], input[type="datetime-local"] {
     width: 100%;
-    padding: 10px;
+    padding: 1px;
     margin-bottom: 20px;
     border: 1px solid #ced4da;
     border-radius: 5px;
