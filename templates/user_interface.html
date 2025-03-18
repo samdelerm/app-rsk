@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Match Viewer</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <script src="/static/js/user_interface.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="/static/Ballon_tr2.png" alt="Tournament Logo" class="logo">
+            <h1>Official Match Viewer</h1>
+        </header>
+        <section class="card">
+            <h2>Select Match</h2>
+            <select id="match-selector" class="dropdown" onchange="fetchMatchInfo()">
+                <option value="">Select Match</option>
+                {% for match in matches %}
+                <option value="{{ match.id }}">Match {{ match.id }}: {{ match.blue_team }} vs {{ match.green_team }}</option>
+                {% endfor %}
+            </select>
+        </section>
+        <section class="card">
+            <h2>Match Information</h2>
+            <div id="match-info">
+                <div class="info-row">
+                    <span class="info-label">Blue Team:</span>
+                    <span id="blue-team" class="info-value">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Blue Score:</span>
+                    <span id="blue-score" class="info-value">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Green Team:</span>
+                    <span id="green-team" class="info-value">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Green Score:</span>
+                    <span id="green-score" class="info-value">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Timer:</span>
+                    <span id="match-timer" class="info-value">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Match Time:</span>
+                    <span id="match-time" class="info-value">N/A</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

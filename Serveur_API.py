@@ -186,7 +186,7 @@ def update_score():
 def get_team_info():
     match_id = request.args.get("match_id")
     try:
-        if match_id == "Select Match":
+        if not match_id or match_id == "Select Match":
             return jsonify({"message": "Invalid match ID"}), 400
         match_id = int(match_id)
         match = next((m for m in matches if m["id"] == match_id), None)
@@ -194,12 +194,13 @@ def get_team_info():
             return jsonify({
                 "blue": {"name": match["blue_team"], "score": match["blue_score"]},
                 "green": {"name": match["green_team"], "score": match["green_score"]},
-                "timer": match.get("timer", 0)
+                "timer": match.get("timer", 0),
+                "match_time": match.get("match_time", "N/A")
             }), 200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        return jsonify({"message": "Error fetching team info"}), 500
+        return jsonify({"message": "Error fetching match info"}), 500
 
 @server.route("/get_matches", methods=["GET"])
 def get_matches():
@@ -297,6 +298,10 @@ def login():
         return jsonify({"success": True}), 200
     else:
         return jsonify({"success": False}), 401
+
+@server.route("/user_interface")
+def user_interface():
+    return render_template("user_interface.html", matches=matches)
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", debug=True, port=5000)
