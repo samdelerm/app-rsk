@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Official Match Viewer</title>
+    <title> Match Viewer</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <script src="/static/js/user_interface.js"></script>
 </head>
@@ -11,7 +11,7 @@
     <div class="container">
         <header class="header">
             <img src="/static/Ballon_tr2.png" alt="Tournament Logo" class="logo">
-            <h1>Official Match Viewer</h1>
+            <h1>Futuristic Match Viewer</h1>
         </header>
         <section class="card">
             <h2>Select Match</h2>
@@ -49,15 +49,23 @@
                     <span class="info-label">Match Time:</span>
                     <span id="match-time" class="info-value">N/A</span>
                 </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span id="match-status" class="info-value">N/A</span>
+                </div>
             </div>
         </section>
         <section class="card">
             <h2>Team Standings</h2>
             <button onclick="fetchStandings()" class="standings-button">Show Current Standings</button>
+            <button onclick="refreshStandings()" class="refresh-button">Refresh Standings</button>
             <div id="standings-info" class="standings-container">
                 <!-- Standings will be dynamically populated here -->
             </div>
         </section>
+        <footer class="footer">
+            <p>© 2023 Futuristic Tournament. All rights reserved.</p>
+        </footer>
     </div>
 </body>
 </html>

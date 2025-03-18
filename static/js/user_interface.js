@@ -30,6 +30,7 @@ function updateMatchInfo() {
                 document.getElementById("green-score").textContent = data.green.score;
                 document.getElementById("match-timer").textContent = data.timer;
                 document.getElementById("match-time").textContent = data.match_time || "N/A";
+                document.getElementById("match-status").textContent = data.status || "N/A";
             }
         })
         .catch(error => console.error("Error fetching match info:", error));
@@ -86,6 +87,12 @@ function fetchStandings() {
             }
         })
         .catch(error => console.error("Error fetching standings:", error));
+}
+
+function refreshStandings() {
+    const standingsContainer = document.getElementById("standings-info");
+    standingsContainer.innerHTML = "<p>Refreshing standings...</p>";
+    fetchStandings();
 }
 
 // Automatically update match info every 0.5 seconds

@@ -195,7 +195,8 @@ def get_team_info():
                 "blue": {"name": match["blue_team"], "score": match["blue_score"]},
                 "green": {"name": match["green_team"], "score": match["green_score"]},
                 "timer": match.get("timer", 0),
-                "match_time": match.get("match_time", "N/A")
+                "match_time": match.get("match_time", "N/A"),
+                "status": match.get("status", "N/A")
             }), 200
         else:
             return jsonify({"message": "Match not found"}), 404
