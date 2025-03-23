@@ -2,7 +2,10 @@ import json
 import os
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
+
 # API Serveur : Stocke les infos et gère les requêtes
 server = Flask(__name__)
 team_info = {
