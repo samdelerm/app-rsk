@@ -1,4 +1,4 @@
-URLBASE = "";
+URLBASE = "/orga";
 
 function submitForm(event, formId) {
     event.preventDefault();
@@ -21,7 +21,7 @@ function submitForm(event, formId) {
 }
 
 function deleteTeam(teamName) {
-    fetch(URLBASE+"/orga/delete_team", {
+    fetch(URLBASE+"/delete_team", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ function deleteTeam(teamName) {
 }
 
 function resetData() {
-    fetch(URLBASE+'/orga/reset_data', {
+    fetch(URLBASE+'/reset_data', {
         method: 'POST'
     }).then(response => response.json())
       .then(data => {
@@ -49,7 +49,7 @@ function resetData() {
 }
 
 function startMatch(matchId) {
-    fetch(URLBASE+'/orga/start_match', {
+    fetch(URLBASE+'/start_match', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ function startMatch(matchId) {
 }
 
 function endMatch(matchId) {
-    fetch(URLBASE+'/orga/end_match', {
+    fetch(URLBASE+'/end_match', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -79,47 +79,3 @@ function endMatch(matchId) {
           window.location.reload();
       }).catch(error => console.error('Error:', error));
 }
-
-function updateMatchTime(matchId, matchTime) {
-    fetch(URLBASE + '/orga/update_match_time', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ match_id: matchId, match_time: matchTime })
-    }).then(response => response.json())
-      .then(data => {
-          if (data.message) {
-              alert(data.message);
-          }
-          window.location.reload();
-      }).catch(error => console.error('Error:', error));
-}
-
-function login(event) {
-    event.preventDefault();
-    const password = document.getElementById('password').value;
-    fetch(URLBASE + '/orga/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ password: password })
-    }).then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              localStorage.setItem('loggedIn', 'true');
-              document.getElementById('login-form').style.display = 'none';
-              document.getElementById('main-content').style.display = 'block';
-          } else {
-              alert('Incorrect password');
-          }
-      }).catch(error => console.error('Error:', error));
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('loggedIn') === 'true') {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-    }
-});
