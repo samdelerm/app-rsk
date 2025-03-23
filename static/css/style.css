@@ -216,13 +216,13 @@ th {
     text-align: center;
     margin-top: 20px;
     padding: 10px;
-    background: #00d4ff;
-    color: #00d4ff;
+    background: #f8f9fa;
+    color: #343a40;
     border-radius: 5px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 .footer p {
-    margin: 0;
+    margin: 5px 0;
     font-size: 14px;
 }
 .hidden {
