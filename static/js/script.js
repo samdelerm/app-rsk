@@ -1,5 +1,3 @@
-
-
 function submitForm(event, formId) {
     event.preventDefault();
     const form = document.getElementById(formId);
@@ -108,7 +106,6 @@ function login(event) {
     }).then(response => response.json())
       .then(data => {
           if (data.success) {
-              localStorage.setItem('loggedIn', 'true');
               document.getElementById('login-form').style.display = 'none';
               document.getElementById('main-content').style.display = 'block';
           } else {
@@ -118,8 +115,7 @@ function login(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('loggedIn') === 'true') {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-    }
+    // Always show the login form on page load
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
 });

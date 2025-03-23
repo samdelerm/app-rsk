@@ -23,7 +23,10 @@ def load_data():
     try:
         with open('matches.json', 'r') as f:
             matches = json.load(f)
-    except FileNotFoundError:
+            # Ensure matches are dictionaries
+            if not all(isinstance(match, dict) for match in matches):
+                raise ValueError("Invalid data format in matches.json")
+    except (FileNotFoundError, ValueError):
         matches = []
     try:
         with open('teams.json', 'r') as f:
@@ -56,24 +59,26 @@ load_data()
 def calculate_standings():
     standings = {}
     for match in matches:
-        if match["status"] == "completed":
-            blue_team = match["blue_team"]
-            green_team = match["green_team"]
+        if not isinstance(match, dict):
+            continue  # Skip invalid entries
+        if match.get("status") == "completed":
+            blue_team = match.get("blue_team")
+            green_team = match.get("green_team")
             if blue_team not in standings:
                 standings[blue_team] = {"wins": 0, "losses": 0, "draws": 0, "goal_average": 0}
             if green_team not in standings:
                 standings[green_team] = {"wins": 0, "losses": 0, "draws": 0, "goal_average": 0}
-            if match["blue_score"] > match["green_score"]:
+            if match.get("blue_score", 0) > match.get("green_score", 0):
                 standings[blue_team]["wins"] += 1
                 standings[green_team]["losses"] += 1
-            elif match["blue_score"] < match["green_score"]:
+            elif match.get("blue_score", 0) < match.get("green_score", 0):
                 standings[blue_team]["losses"] += 1
                 standings[green_team]["wins"] += 1
             else:
                 standings[blue_team]["draws"] += 1
                 standings[green_team]["draws"] += 1
-            standings[blue_team]["goal_average"] += match["blue_score"] - match["green_score"]
-            standings[green_team]["goal_average"] += match["green_score"] - match["blue_score"]
+            standings[blue_team]["goal_average"] += match.get("blue_score", 0) - match.get("green_score", 0)
+            standings[green_team]["goal_average"] += match.get("green_score", 0) - match.get("blue_score", 0)
     return standings
 
 @server.route("/orga/interface")
