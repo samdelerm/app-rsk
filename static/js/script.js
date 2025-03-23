@@ -2,7 +2,7 @@ function submitForm(event, formId) {
     event.preventDefault();
     const form = document.getElementById(formId);
     const formData = new FormData(form);
-    fetch(form.action.startsWith(URLBASE) ? form.action : URLBASE + form.action, {
+    fetch(form.action, {
         method: form.method,
         body: formData
     }).then(response => {
@@ -90,7 +90,6 @@ function updateMatchTime(matchId, matchTime) {
           if (data.message) {
               alert(data.message);
           }
-          window.location.reload();
       }).catch(error => console.error('Error:', error));
 }
 
@@ -117,6 +116,29 @@ function login(event) {
             alert('Mot de passe incorrect');
         }
     }).catch(error => console.error('Erreur :', error));
+}
+
+function openTablesWindow() {
+    const poolsTable = document.getElementById('pools-table').outerHTML;
+    const matchesTable = document.getElementById('matches-table').outerHTML;
+
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    newWindow.document.write(`
+        <html>
+        <head>
+            <title>Tableaux</title>
+            <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+        </head>
+        <body>
+            <h1>Tableaux</h1>
+            <h2>Poules</h2>
+            ${poolsTable}
+            <h2>Matchs Générés</h2>
+            ${matchesTable}
+        </body>
+        </html>
+    `);
+    newWindow.document.close();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

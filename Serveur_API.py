@@ -15,7 +15,7 @@ teams = []
 pools = [[], [], [], []]
 
 # Password is defined by an environment variable, defaults to "default_password"
-PASSWORD = os.getenv("APP_PASSWORD", "default_password")
+PASSWORD = os.getenv("MATCH_INFOS", "default_password")
 print("Password:", PASSWORD)
 
 def load_data():

@@ -125,9 +125,10 @@
             <header class="header">
                 <h1>Tableau de Bord de la Compétition</h1>
             </header>
+            <button onclick="openTablesWindow()" class="standings-button">Afficher les Tableaux</button>
             <h1>Match Infos</h1>
             <h2>Matchs</h2>
-            <table>
+            <table id="pools-table">
                 <thead>
                     <tr>
                         <th>Poule 1</th>
@@ -151,7 +152,7 @@
                 </tbody>
             </table>
             <h2>Generated Matchs</h2>
-            <table>
+            <table id="matches-table">
                 <thead>
                     <tr>
                         <th>Match ID</th>
@@ -161,6 +162,7 @@
                         <th>Blue Score</th>
                         <th>Green Score</th>
                         <th>Status</th>
+                        <th>Match Time</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -174,6 +176,9 @@
                         <td>{{ match.blue_score }}</td>
                         <td>{{ match.green_score }}</td>
                         <td>{{ match.status }}</td>
+                        <td>
+                            <input type="datetime-local" value="{{ match.match_time }}" onchange="updateMatchTime('{{ match.id }}', this.value)">
+                        </td>
                         <td>
                             {% if match.status == 'upcoming' %}
                             <button class="start-button" onclick="startMatch('{{ match.id }}')">Start Match</button>
