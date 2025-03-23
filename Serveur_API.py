@@ -12,9 +12,11 @@ team_info = {
 
 matches = []
 teams = []
-pools = [[], [], [],[] ]
+pools = [[], [], [], []]
 
+# Password is defined by an environment variable, defaults to "default_password"
 PASSWORD = os.getenv("APP_PASSWORD", "default_password")
+print("Password:", PASSWORD)
 
 def load_data():
     global matches, teams, pools
@@ -32,7 +34,7 @@ def load_data():
         with open('pools.json', 'r') as f:
             pools = json.load(f)
     except FileNotFoundError:
-        pools = [[], [], [],[]]
+        pools = [[], [], [], []]
 
 def save_data():
     with open('matches.json', 'w') as f:
@@ -46,7 +48,7 @@ def reset_data():
     global matches, teams, pools
     matches = []
     teams = []
-    pools = [[], [], [],[]]
+    pools = [[], [], [], []]
     save_data()
 
 load_data()

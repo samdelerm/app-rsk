@@ -108,18 +108,16 @@ function login(event) {
     }).then(response => response.json())
       .then(data => {
           if (data.success) {
-              localStorage.setItem('loggedIn', 'true');
-              document.getElementById('login-form').style.display = 'none';
-              document.getElementById('main-content').style.display = 'block';
+              document.getElementById('login-form').classList.add('hidden');
+              document.getElementById('main-content').classList.remove('hidden');
           } else {
-              alert('Incorrect password');
+              alert('Mot de passe incorrect');
           }
-      }).catch(error => console.error('Error:', error));
+      }).catch(error => console.error('Erreur :', error));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('loggedIn') === 'true') {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-    }
+    // Always show the login form on page load
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('main-content').classList.add('hidden');
 });
