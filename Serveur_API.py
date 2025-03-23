@@ -320,4 +320,6 @@ def user_interface():
     return render_template("user_interface.html", matches=matches)
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", debug=True, port=5000)
+    from werkzeug.serving import run_simple
+    run_simple("127.0.0.1", 5000, server, use_reloader=True, use_debugger=True)
+    #server.run(host="127.0.0.1", port=5000, debug=True)
