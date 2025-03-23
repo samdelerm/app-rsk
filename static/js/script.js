@@ -1,4 +1,4 @@
-URLBASE = "/orga";
+
 
 function submitForm(event, formId) {
     event.preventDefault();
@@ -21,7 +21,7 @@ function submitForm(event, formId) {
 }
 
 function deleteTeam(teamName) {
-    fetch(URLBASE+"/delete_team", {
+    fetch("/orga/delete_team", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ function deleteTeam(teamName) {
 }
 
 function resetData() {
-    fetch(URLBASE+'/reset_data', {
+    fetch('/orga/reset_data', {
         method: 'POST'
     }).then(response => response.json())
       .then(data => {
@@ -49,7 +49,7 @@ function resetData() {
 }
 
 function startMatch(matchId) {
-    fetch(URLBASE+'/start_match', {
+    fetch('/orga/start_match', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ function startMatch(matchId) {
 }
 
 function endMatch(matchId) {
-    fetch(URLBASE+'/end_match', {
+    fetch('/orga/end_match', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ function endMatch(matchId) {
 }
 
 function updateMatchTime(matchId, matchTime) {
-    fetch(URLBASE + '/orga/update_match_time', {
+    fetch('/orga/update_match_time', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ function updateMatchTime(matchId, matchTime) {
 function login(event) {
     event.preventDefault();
     const password = document.getElementById('password').value;
-    fetch(URLBASE + '/orga/login', {
+    fetch('/orga/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

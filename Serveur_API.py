@@ -1,6 +1,7 @@
 import json
+import os
 from flask import Flask, request, jsonify, render_template
-URLBASE="/orga"
+
 # API Serveur : Stocke les infos et gère les requêtes
 server = Flask(__name__)
 team_info = {
@@ -11,9 +12,11 @@ team_info = {
 
 matches = []
 teams = []
-pools = [[], [], [],[] ]
+pools = [[], [], [], []]
 
+# Password is defined by an environment variable, defaults to "default_password"
 PASSWORD = os.getenv("APP_PASSWORD", "default_password")
+print("Password:", PASSWORD)
 
 def load_data():
     global matches, teams, pools
@@ -50,9 +53,6 @@ def reset_data():
 
 load_data()
 
-# HTML template for index.html
-
-
 def calculate_standings():
     standings = {}
     for match in matches:
@@ -60,21 +60,26 @@ def calculate_standings():
             blue_team = match["blue_team"]
             green_team = match["green_team"]
             if blue_team not in standings:
-                standings[blue_team] = {"wins": 0, "losses": 0}
+                standings[blue_team] = {"wins": 0, "losses": 0, "draws": 0, "goal_average": 0}
             if green_team not in standings:
-                standings[green_team] = {"wins": 0, "losses": 0}
+                standings[green_team] = {"wins": 0, "losses": 0, "draws": 0, "goal_average": 0}
             if match["blue_score"] > match["green_score"]:
                 standings[blue_team]["wins"] += 1
                 standings[green_team]["losses"] += 1
-            else:
+            elif match["blue_score"] < match["green_score"]:
                 standings[blue_team]["losses"] += 1
                 standings[green_team]["wins"] += 1
+            else:
+                standings[blue_team]["draws"] += 1
+                standings[green_team]["draws"] += 1
+            standings[blue_team]["goal_average"] += match["blue_score"] - match["green_score"]
+            standings[green_team]["goal_average"] += match["green_score"] - match["blue_score"]
     return standings
 
-@server.route(f"{URLBASE}/")
-def index():
+@server.route("/orga/interface")
+def organizer_interface():
     standings = calculate_standings()
-    return render_template('index.html', team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
+    return render_template("index.html", team_info=team_info, matches=matches, standings=standings, teams=teams, pools=pools, len=len, max=max)
 
 def distribute_teams_into_pools(teams):
     import random
@@ -83,7 +88,7 @@ def distribute_teams_into_pools(teams):
     for i in range(num_pools):
         pools[i] = teams[i::num_pools]
 
-@server.route(f"{URLBASE}/generate_pools", methods=["POST"])
+@server.route("/orga/generate_pools", methods=["POST"])
 def generate_pools():
     try:
         if len(teams) < 2:
@@ -96,7 +101,7 @@ def generate_pools():
     except Exception as e:
         return jsonify({"message": "Error generating pools"}), 500
 
-def generate_matches_for_pools():
+def generate_matches_for_pools(match_time):
     match_id = 1
     for pool_index, pool in enumerate(pools):
         for i in range(len(pool)):
@@ -108,21 +113,23 @@ def generate_matches_for_pools():
                     "green_team": pool[j],
                     "blue_score": 0,
                     "green_score": 0,
-                    "status": "upcoming"
+                    "status": "upcoming",
+                    "match_time": match_time
                 })
                 match_id += 1
 
-@server.route(f"{URLBASE}/generate_matches", methods=["POST"])
+@server.route("/orga/generate_matches", methods=["POST"])
 def generate_matches():
     try:
         matches.clear()  # Clear existing matches before creating new ones
-        generate_matches_for_pools()
+        match_time = request.form.get("match_time")
+        generate_matches_for_pools(match_time)
         save_data()
         return jsonify({"message": "Matches generated successfully"}), 200
     except Exception as e:
         return jsonify({"message": "Error generating matches"}), 500
 
-@server.route(f"{URLBASE}/add_team", methods=["POST"])
+@server.route("/orga/add_team", methods=["POST"])
 def add_team():
     try:
         team_name = request.form.get("team_name")
@@ -135,21 +142,21 @@ def add_team():
     except Exception as e:
         return jsonify({"message": "Error adding team"}), 500
 
-@server.route(f"{URLBASE}/delete_team", methods=["POST"])
+@server.route("/orga/delete_team", methods=["POST"])
 def delete_team():
     try:
         data = request.get_json()
         team_name = data.get("team_name")
-        if team_name in teams:
+        if (team_name in teams) and (team_name not in [match["blue_team"] for match in matches]) and (team_name not in [match["green_team"] for match in matches]):
             teams.remove(team_name)
             save_data()
             return jsonify({"message": "Team deleted successfully"}), 200
         else:
-            return jsonify({"message": "Team not found"}), 404
+            return jsonify({"message": "Team not found or is part of a match"}), 404
     except Exception as e:
         return jsonify({"message": "Error deleting team"}), 500
 
-@server.route(f"{URLBASE}/reset_data", methods=["POST"])
+@server.route("/orga/reset_data", methods=["POST"])
 def reset_data_route():
     try:
         reset_data()
@@ -157,7 +164,7 @@ def reset_data_route():
     except Exception as e:
         return jsonify({"message": "Error resetting data"}), 500
 
-@server.route(f"{URLBASE}/update_score", methods=["POST"])
+@server.route("/orga/update_score", methods=["POST"])
 def update_score():
     global matches
     try:
@@ -177,23 +184,11 @@ def update_score():
     except Exception as e:
         return jsonify({"message": "Error updating scores, names, and timer"}), 500
 
-@server.route(f"{URLBASE}/set_team_name", methods=["POST"])
-def set_team_name():
-    global team_info
-    try:
-        data = request.form
-        team_info["blue"]["name"] = data.get("blue_name", team_info["blue"]["name"])
-        team_info["green"]["name"] = data.get("green_name", team_info["green"]["name"])
-        save_data()
-        return jsonify({"message": "Team names updated successfully"}), 200
-    except Exception as e:
-        return jsonify({"message": "Error updating team names"}), 500
-
-@server.route(f"{URLBASE}/get_team_info", methods=["GET"])
+@server.route("/get_team_info", methods=["GET"])
 def get_team_info():
     match_id = request.args.get("match_id")
     try:
-        if match_id == "Select Match":
+        if not match_id or match_id == "Select Match":
             return jsonify({"message": "Invalid match ID"}), 400
         match_id = int(match_id)
         match = next((m for m in matches if m["id"] == match_id), None)
@@ -201,21 +196,23 @@ def get_team_info():
             return jsonify({
                 "blue": {"name": match["blue_team"], "score": match["blue_score"]},
                 "green": {"name": match["green_team"], "score": match["green_score"]},
-                "timer": match.get("timer", 0)
+                "timer": match.get("timer", 0),
+                "match_time": match.get("match_time", "N/A"),
+                "status": match.get("status", "N/A")
             }), 200
         else:
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
-        return jsonify({"message": "Error fetching team info"}), 500
+        return jsonify({"message": "Error fetching match info"}), 500
 
-@server.route(f"{URLBASE}/get_matches", methods=["GET"])
+@server.route("/orga/get_matches", methods=["GET"])
 def get_matches():
     try:
         return jsonify(matches), 200
     except Exception as e:
         return jsonify({"message": "Error fetching matches"}), 500
 
-@server.route(f"{URLBASE}/add_update_match", methods=["POST"])
+@server.route("/orga/add_update_match", methods=["POST"])
 def add_update_match():
     global matches
     try:
@@ -245,7 +242,7 @@ def add_update_match():
     except Exception as e:
         return jsonify({"message": "Error adding/updating match"}), 500
 
-@server.route(f"{URLBASE}/start_match", methods=["POST"])
+@server.route("/orga/start_match", methods=["POST"])
 def start_match():
     global matches
     try:
@@ -261,7 +258,7 @@ def start_match():
     except Exception as e:
         return jsonify({"message": "Error starting match"}), 500
 
-@server.route(f"{URLBASE}/end_match", methods=["POST"])
+@server.route("/orga/end_match", methods=["POST"])
 def end_match():
     global matches
     try:
@@ -279,14 +276,43 @@ def end_match():
             return jsonify({"message": "Match not found"}), 404
     except Exception as e:
         return jsonify({"message": "Error ending match"}), 500
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
+@server.route("/orga/update_match_time", methods=["POST"])
+def update_match_time():
+    global matches
+    try:
+        data = request.get_json()
+        match_id = data.get("match_id")
+        match_time = data.get("match_time")
+        match = next((m for m in matches if m["id"] == int(match_id)), None)
+        if match:
+            match["match_time"] = match_time
+            save_data()
+            return jsonify({"message": "Match time updated successfully"}), 200
+        else:
+            return jsonify({"message": "Match not found"}), 404
+    except Exception as e:
+        return jsonify({"message": "Error updating match time"}), 500
 
+@server.route("/get_standings", methods=["GET"])
+def get_standings():
+    try:
+        standings = calculate_standings()
+        return jsonify(standings), 200
+    except Exception as e:
+        return jsonify({"message": "Error fetching standings"}), 500
 
-app_with_prefix = DispatcherMiddleware(Flask('dummy_app'), {
-    f'{URLBASE}': server
-})
+@server.route("/orga/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    if data.get("password") == PASSWORD:
+        return jsonify({"success": True}), 200
+    else:
+        return jsonify({"success": False}), 401
+
+@server.route("/")
+def user_interface():
+    return render_template("user_interface.html", matches=matches)
+
 if __name__ == "__main__":
-    from werkzeug.serving import run_simple
-    run_simple("127.0.0.1", 5000, app_with_prefix)
-    #server.run(host='0.0.0.0', port=5000, debug=True)
+    server.run(host="0.0.0.0", debug=True, port=5000)
