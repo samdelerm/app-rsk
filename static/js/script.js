@@ -103,19 +103,29 @@ function login(event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ password: password })
-    }).then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              document.getElementById('login-form').style.display = 'none';
-              document.getElementById('main-content').style.display = 'block';
-          } else {
-              alert('Incorrect password');
-          }
-      }).catch(error => console.error('Error:', error));
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then(data => {
+        if (data.success) {
+            sessionStorage.setItem('loggedIn', 'true'); // Persist login state for the session
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        } else {
+            alert('Mot de passe incorrect');
+        }
+    }).catch(error => console.error('Erreur :', error));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Always show the login form on page load
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('main-content').style.display = 'none';
+    // Check sessionStorage for login state
+    if (sessionStorage.getItem('loggedIn') === 'true') {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    } else {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('main-content').style.display = 'none';
+    }
 });
